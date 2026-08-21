@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Forge — Lista do Churras</title>
+  <style>
+    :root {
+      --paper: #1a120c;
+      --ink: #f4e6c8;
+      --ember: #c45c26;
+      --gold: #e0b15a;
+      --ash: #8a7a66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Georgia", "Palatino Linotype", serif;
+      background:
+        radial-gradient(ellipse at 20% 0%, #3a2214 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, #2a1810 0%, transparent 45%),
+        var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+    .sheet {
+      max-width: 42rem;
+      margin: 0 auto;
+      border: 1px solid #5a3a22;
+      background: linear-gradient(180deg, #24180f 0%, #1a120c 100%);
+      box-shadow: 0 24px 60px rgba(0,0,0,.45), inset 0 0 80px rgba(196,92,38,.08);
+      padding: 2rem 1.75rem 2.5rem;
+      position: relative;
+    }
+    .sheet::before {
+      content: "";
+      position: absolute; inset: 10px;
+      border: 1px dashed #6b4a2e;
+      pointer-events: none;
+    }
+    h1 { font-size: 1.65rem; letter-spacing: .04em; margin: 0 0 .35rem; color: var(--gold); }
+    .lede { color: var(--ash); font-size: .95rem; margin: 0 0 1.5rem; }
+    .seal {
+      width: 140px; height: 140px;
+      margin: 0 auto 1.5rem;
+      display: block;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.5));
+    }
+    .stamp-label {
+      text-align: center;
+      font-variant: small-caps;
+      letter-spacing: .28em;
+      color: var(--ember);
+      font-size: .8rem;
+      margin: -.5rem 0 1.75rem;
+    }
+    h2 { font-size: 1rem; color: var(--ember); letter-spacing: .12em; text-transform: uppercase; margin: 1.6rem 0 .5rem; }
+    ul { margin: 0; padding-left: 1.1rem; }
+    li { margin: .4rem 0; line-height: 1.45; }
+    .voices { display: grid; gap: .75rem; margin-top: .5rem; }
+    .voice {
+      border-left: 3px solid var(--ember);
+      padding: .4rem 0 .4rem .85rem;
+      color: #ead7b4;
+      font-size: .95rem;
+    }
+    .voice b { color: var(--gold); }
+    .icon { font-style: normal; }
+    footer { margin-top: 2rem; font-size: .8rem; color: var(--ash); text-align: center; }
+  </style>
+</head>
+<body>
+  <article class="sheet">
+    <svg class="seal" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-label="Selo HARDENED">
+      <defs>
+        <radialGradient id="wax" cx="40%" cy="35%" r="70%">
+          <stop offset="0%" stop-color="#e07038"/>
+          <stop offset="55%" stop-color="#b43a18"/>
+          <stop offset="100%" stop-color="#6a1c0c"/>
+        </radialGradient>
+      </defs>
+      <circle cx="70" cy="70" r="64" fill="url(#wax)" />
+      <circle cx="70" cy="70" r="56" fill="none" stroke="#f0c27a" stroke-width="2" stroke-dasharray="4 3"/>
+      <text x="70" y="66" text-anchor="middle" fill="#f8e6c0" font-size="13" font-family="Georgia, serif" font-weight="700">HARDENED</text>
+      <text x="70" y="86" text-anchor="middle" fill="#f0c27a" font-size="8" font-family="Georgia, serif" letter-spacing="2">21.08.2026</text>
+    </svg>
+    <p class="stamp-label">ideia forjada</p>
+    <h1>Lista do Churras</h1>
+    <p class="lede">Reviews do Bora Churrasco viraram a evidência. O Pix continua no listing. O produto é o quilo que não mente.</p>
+
+    <h2>O que travou</h2>
+    <ul>
+      <li>Job: não passar vergonha (faltar) nem quebrar o bolso (sobrar).</li>
+      <li>V1 pergunta fome, horas, cortes, quem bebe, acompanhamentos, carvão de verdade.</li>
+      <li>Preço = R$/kg que o usuário cola. Rateio Pix = gancho, depois do kg.</li>
+      <li>Grátis + ads + IAP tira anúncio. Recalcular zera.</li>
+    </ul>
+
+    <h2>O que morreu</h2>
+    <ul>
+      <li>Clone do Bora com botão Pix — mesmas 1★, número dividido.</li>
+      <li>Fórmula única 400g como verdade. O próprio Bora admite “conhecer os convidados”.</li>
+      <li>Pago na frente. Pix na nuvem. Açougue-app.</li>
+    </ul>
+
+    <h2>O que ainda pode quebrar</h2>
+    <ul>
+      <li>Sem churrasco real medido, o “kg certo” é faixa + slider de fome.</li>
+      <li>Ninguém nas reviews pediu Pix. Se o cálculo falhar, o listing de rateio não salva.</li>
+    </ul>
+
+    <h2>Quem pressionou</h2>
+    <div class="voices">
+      <div class="voice"><span class="icon">📊</span> <b>Mary:</b> contei os comentários. Cálculo e cardápio gritam. Rateio quase não existe na amostra.</div>
+      <div class="voice"><span class="icon">📋</span> <b>John:</b> o job não é “organizar lista”. É não ser o anfitrião que acaba o picanha às 16h.</div>
+      <div class="voice"><span class="icon">🎨</span> <b>Sally:</b> amarelo no vermelho e stepper sem teclado. A lista tem que ser legível no sol do quintal.</div>
+      <div class="voice"><span class="icon">🔥</span> <b>Dona Cida</b> (churrasqueira, voz gerada): 2 kg de carvão pra 6 pessoas é gozação. Eu não abro Pix em cima de número mentiroso.</div>
+      <div class="voice"><span class="icon">🥩</span> <b>Renan do Bora</b> (concorrente, voz gerada): 400g é média. Quem conhece a turma ajusta. Então perguntem a fome, não me copiem o chute.</div>
+    </div>
+    <footer>Forge salvo em _bmad-output/forge/churrascometro-rateio-pix/</footer>
+  </article>
+</body>
+</html>

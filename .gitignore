@@ -1,0 +1,27 @@
+# Secrets and local env
+.env
+.env.*
+!.env.example
+
+# BMad personal overrides (team config in _bmad/custom/config.toml is committed)
+_bmad/**/*.user.toml
+_bmad/custom/*.user.toml
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+*.iml
+
+# Flutter / Dart (when the app lands)
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+*.lock
+!pubspec.lock
+.flutter-plugins
+.flutter-plugins-dependencies
