@@ -7,6 +7,10 @@
 _bmad/**/*.user.toml
 _bmad/custom/*.user.toml
 
+# Python bytecode from BMad scripts
+__pycache__/
+*.py[cod]
+
 # OS / editor
 .DS_Store
 Thumbs.db
