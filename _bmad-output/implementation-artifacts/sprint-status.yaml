@@ -1,0 +1,26 @@
+# generated: 08-21-2026 22:15
+# project: lista-do-churras
+# project_key: LDC
+# tracking_system: file-system
+# story_location: "_bmad-output/planning-artifacts/epics"
+
+generated: 08-21-2026 22:15
+last_updated: 08-21-2026 22:15
+project: lista-do-churras
+project_key: LDC
+tracking_system: file-system
+story_location: "_bmad-output/planning-artifacts/epics"
+
+development_status:
+  epic-1: in-progress
+  epic-1: done
+  1-1-calcular-lista-puro: done
+  epic-1-retrospective: optional
+
+  epic-2: done
+  2-1-fluxo-uj1-sem-preco: done
+  2-2-preco-copiar-anuncio: done
+  epic-2-retrospective: optional
+  epic-2-retrospective: optional
+
+action_items: []
