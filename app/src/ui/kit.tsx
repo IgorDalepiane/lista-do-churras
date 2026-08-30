@@ -16,29 +16,37 @@ export function Grid({ children }: { children: ReactNode }) {
   return <View style={styles.grid}>{children}</View>;
 }
 
+export function GroupLabel({ children }: { children: string }) {
+  return <Text style={styles.groupLabel}>{children}</Text>;
+}
+
 export function SelectCard({
-  emoji,
+  icon,
   label,
   tint,
   on,
   onPress,
 }: {
-  emoji: string;
+  icon: ReactNode;
   label: string;
   tint: string;
   on: boolean;
   onPress: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} style={[styles.tile, on && styles.tileOn]}>
+    <Pressable
+      onPress={onPress}
+      style={[styles.tile, on && styles.tileOn]}
+      accessibilityRole="button"
+      accessibilityState={{ selected: on }}
+      accessibilityLabel={label}
+    >
       {on ? (
         <View style={styles.check}>
           <Text style={styles.checkTxt}>✓</Text>
         </View>
       ) : null}
-      <View style={[styles.iconBox, { backgroundColor: tint }]}>
-        <Text style={styles.emoji}>{emoji}</Text>
-      </View>
+      <View style={[styles.iconBox, { backgroundColor: tint }]}>{icon}</View>
       <Text style={[styles.tileLabel, !on && styles.tileLabelOff]}>{label}</Text>
     </Pressable>
   );
@@ -125,6 +133,15 @@ export function Counter({
 export const styles = StyleSheet.create({
   title: { color: C.ink, fontSize: 30, fontWeight: '800', letterSpacing: -0.7, marginTop: 8 },
   sub: { color: C.muted, fontSize: 16, marginTop: 8, marginBottom: 22, lineHeight: 22 },
+  groupLabel: {
+    color: C.muted,
+    fontWeight: '800',
+    fontSize: 12,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+    marginTop: 8,
+  },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   tile: {
     width: '47%',
@@ -152,7 +169,6 @@ export const styles = StyleSheet.create({
   },
   checkTxt: { color: C.card, fontSize: 12, fontWeight: '800' },
   iconBox: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  emoji: { fontSize: 26 },
   tileLabel: { color: C.ink, fontWeight: '700', textAlign: 'center' },
   tileLabelOff: { color: C.muted, fontWeight: '600' },
   radio: {

@@ -5,11 +5,19 @@
   "dependencies": {
     "@expo/metro-runtime": "~57.0.12",
     "expo": "~57.0.15",
+    "expo-build-properties": "~57.0.15",
     "expo-clipboard": "~57.0.1",
+    "expo-constants": "~57.0.16",
+    "expo-dev-client": "~57.0.16",
+    "expo-iap": "^5.4.1",
+    "expo-secure-store": "~57.0.2",
+    "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.2",
+    "react-native-google-mobile-ads": "16.5.0",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-web": "^0.21.2"
   },
@@ -20,11 +28,12 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "expo start",
+    "start": "expo start --dev-client",
     "test": "tsx --test src/domain/*.test.ts",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "export:web": "expo export --platform web"
   },
   "private": true
 }

@@ -22,6 +22,9 @@ export const SIDES: { id: SideId; nome: string }[] = [
   { id: 'prato', nome: 'Prato' },
 ];
 
+export const SIDE_FOOD: SideId[] = ['farofa', 'vinagrete', 'pao', 'gelo'];
+export const SIDE_DISPOSABLE: SideId[] = ['copo', 'prato'];
+
 export const HUNGER_LABEL: Record<Hunger, string> = {
   pouco: 'Pouco',
   medio: 'Médio',
