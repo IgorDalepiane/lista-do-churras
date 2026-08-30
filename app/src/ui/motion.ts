@@ -50,16 +50,6 @@ export function playHaptic(kind: HapticKind): void {
   if (Platform.OS === 'web') return;
   void (async () => {
     try {
-      if (Platform.OS === 'android') {
-        const type =
-          kind === 'success'
-            ? Haptics.AndroidHaptics.Confirm
-            : kind === 'light'
-              ? Haptics.AndroidHaptics.Segment_Frequent_Tick
-              : Haptics.AndroidHaptics.Context_Click;
-        await Haptics.performAndroidHapticsAsync(type);
-        return;
-      }
       if (kind === 'success') {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         return;

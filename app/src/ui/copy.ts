@@ -114,7 +114,11 @@ export const privacy = {
   sections: [
     {
       heading: 'O que fica no aparelho',
-      body: 'Gente, cortes, quantidades e os preços que você cola. Esses números não são enviados para a gente. O app funciona sem internet depois de instalado, salvo anúncios e compra na loja.',
+      body: 'Gente, cortes, quantidades e os preços que você cola. Esses números não são enviados para a gente. O app funciona sem internet depois de instalado, salvo anúncios, compra na loja e uma checagem de atualização do código quando o aparelho está online.',
+    },
+    {
+      heading: 'Atualizações do app',
+      body: 'Se o aparelho estiver online, o app pode perguntar à Expo se existe uma correção de código para baixar, sem passar pela loja. Esse pedido não leva a lista nem os preços. Sem internet o cálculo usa o que já está no aparelho.',
     },
     {
       heading: 'Anúncios',

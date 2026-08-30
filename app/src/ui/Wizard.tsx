@@ -1,6 +1,8 @@
 import * as Clipboard from 'expo-clipboard';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  BackHandler,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -184,14 +186,29 @@ export function Wizard() {
     setStepIndex((i) => Math.min(i + 1, steps.length - 1));
   }
 
-  function back() {
+  const back = useCallback(() => {
     if (showPrivacy) {
       setShowPrivacy(false);
       return;
     }
     setDirection('back');
     setStepIndex((i) => Math.max(i - 1, 0));
-  }
+  }, [showPrivacy]);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (Keyboard.isVisible()) {
+        Keyboard.dismiss();
+        return true;
+      }
+      if (showPrivacy || stepIndex > 0) {
+        back();
+        return true;
+      }
+      return false;
+    });
+    return () => sub.remove();
+  }, [back, showPrivacy, stepIndex]);
 
   async function copyLista() {
     await Clipboard.setStringAsync(listaTexto(lista, precos));
