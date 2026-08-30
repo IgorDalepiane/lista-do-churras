@@ -2,7 +2,7 @@
 name: Lista do Churras
 status: final
 created: 2026-08-21
-updated: 2026-08-21
+updated: 2026-08-29
 sources:
   - _bmad-output/planning-artifacts/prds/prd-lista-do-churras-2026-08-21/prd.md
   - _bmad-output/planning-artifacts/ux-designs/ux-lista-do-churras-2026-08-21/DESIGN.md
@@ -46,6 +46,17 @@ Direto, brasileiro, informal sem meme. “Faltou carne” é o medo; a UI não z
 - Stepper ± e teclado numérico.
 - Slider %: ao soltar, rebalanceia os outros cortes para 100%.
 - Copiar: clipboard texto PT-BR (vírgula decimal).
+
+### Motion
+
+Tokens em `app/src/ui/motion.ts`. Só ease-out; o próximo toque vale na hora (sem `disabled` enquanto anima; sem animação de saída na troca de etapa).
+
+- **Press:** 100ms, escala ~0.97 + opacidade leve nos controles do kit, CTA, presets de hora e ± da partilha. Haptic leve em seleção / ±; haptic de sucesso em Copiar.
+- **Chrome:** barra de progresso 200ms. Só a etapa que entra: fade + 10px de slide (avançar pela direita, voltar pela esquerda).
+- **Aparecer:** fade 240ms quando o preview de carne, total da linha ou card de total passam a existir (já dentro da etapa). Linhas de fome entram com a etapa, sem fade extra. Hero da Lista: fade + escala 0.98→1 ao chegar. CTA Copiar mergulha no verde de sucesso e volta; a troca de texto continua sendo a confirmação (sem toast).
+- **CTA habilitado:** cor interpola cinza→ink; dá para tocar no instante em que a etapa é válida.
+- **Reduzir movimento:** sem transforms nem layout motion; mantém borda selecionada, CTA cinza→ink e o rótulo Copiado.
+- **Não fazer:** count-up no kg, stagger nas linhas da Lista ou nos tiles de Cortes/Mesa, bounce/spring, swipe entre etapas, animar anúncio ou paywall, intro de splash.
 
 ## Accessibility Floor
 

@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TextInput, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import type { ListaItem } from '../domain/types';
 import {
   formatMoney,
@@ -9,6 +10,7 @@ import {
   unitPriceLabel,
 } from '../domain/format';
 import { ItemIcon } from './icons';
+import { enterAppear, useReduceMotion } from './motion';
 import { C } from './theme';
 
 export function ListaRow({
@@ -20,6 +22,7 @@ export function ListaRow({
   value: string;
   onChange: (t: string) => void;
 }) {
+  const reduce = useReduceMotion();
   const preco = parseBrNumber(value);
   const linha = preco != null ? item.quantidade * preco : null;
   const unitLabel = unitPriceLabel(item.unidade);
@@ -51,10 +54,10 @@ export function ListaRow({
         </View>
       </View>
       {linha != null && preco != null ? (
-        <Text style={styles.lineTotal}>
+        <Animated.Text entering={reduce ? undefined : enterAppear} style={styles.lineTotal}>
           {formatQty(item.quantidade, item.unidade)} × {formatUnitPrice(preco, item.unidade)} ={' '}
           {formatMoney(linha)}
-        </Text>
+        </Animated.Text>
       ) : null}
     </View>
   );

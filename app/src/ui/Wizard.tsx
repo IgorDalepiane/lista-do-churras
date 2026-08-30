@@ -1,15 +1,15 @@
 import * as Clipboard from 'expo-clipboard';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { calcularLista, equalPercents, rebalancePercents } from '../domain/calculate';
 import { CUTS, HUNGER_LABEL, SIDE_DISPOSABLE, SIDE_FOOD, SIDES } from '../domain/catalog';
@@ -41,8 +41,17 @@ import {
   titles,
 } from './copy';
 import { ItemIcon, PeopleIcon } from './icons';
-import { Counter, Grid, GroupLabel, Radio, Screen, Segmented, SelectCard } from './kit';
+import { Counter, CtaPressable, Grid, GroupLabel, PressScale, Radio, Screen, Segmented, SelectCard } from './kit';
 import { ListaRow } from './ListaRow';
+import {
+  easeOut,
+  enterAppear,
+  enterHero,
+  enterStepBack,
+  enterStepForward,
+  stepMs,
+  useReduceMotion,
+} from './motion';
 import { PrivacyPolicy } from './PrivacyPolicy';
 import type { StepId } from './steps';
 import { C, TILE } from './theme';
@@ -77,6 +86,9 @@ export function Wizard() {
   const [copied, setCopied] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward');
+  const scrollRef = useRef<ScrollView>(null);
+  const reduceMotion = useReduceMotion();
   const monetization = useMonetization();
 
   const peopleCount = homens + mulheres + criancas;
@@ -92,6 +104,7 @@ export function Wizard() {
 
   const step = steps[Math.min(stepIndex, steps.length - 1)];
   const progress = (stepIndex + 1) / steps.length;
+  const stepEntering = reduceMotion ? undefined : direction === 'forward' ? enterStepForward : enterStepBack;
 
   const lista = useMemo(
     () =>
@@ -129,6 +142,10 @@ export function Wizard() {
   const total = totalEstimado(lista, precos);
   const pricedCount = lista.ok ? lista.itens.filter((i) => parseBrNumber(precos[i.id] ?? '') != null).length : 0;
 
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [stepIndex]);
+
   function toggleCut(id: CutId) {
     setCorteIds((prev) => {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
@@ -163,6 +180,7 @@ export function Wizard() {
 
   function next() {
     if (!canContinue()) return;
+    setDirection('forward');
     setStepIndex((i) => Math.min(i + 1, steps.length - 1));
   }
 
@@ -171,6 +189,7 @@ export function Wizard() {
       setShowPrivacy(false);
       return;
     }
+    setDirection('back');
     setStepIndex((i) => Math.max(i - 1, 0));
   }
 
@@ -194,18 +213,19 @@ export function Wizard() {
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.top}>
-          <Pressable
+          <PressScale
             style={styles.navCircle}
             onPress={back}
             disabled={stepIndex === 0}
+            haptic="selection"
             accessibilityRole="button"
             accessibilityLabel="Voltar"
           >
             <Ionicons name="arrow-back" size={22} color={C.ink} style={stepIndex === 0 ? { opacity: 0.25 } : undefined} />
-          </Pressable>
+          </PressScale>
           <View style={{ flex: 1 }}>
             <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
+              <ProgressFill progress={progress} reduceMotion={reduceMotion} />
             </View>
             <Text style={styles.stepCaption}>
               {stepIndex + 1} de {steps.length} · {STEP_NAME[step]}
@@ -214,248 +234,274 @@ export function Wizard() {
         </View>
 
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={[styles.scroll, step === 'lista' && styles.scrollLista]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-          {step === 'cortes' && (
-            <Screen title={titles.cortes} sub={corteSub(corteIds.length)}>
-              <Grid>
-                {CUTS.map((c, i) => (
-                  <SelectCard
-                    key={c.id}
-                    icon={<ItemIcon id={c.id} />}
-                    label={c.nome}
-                    tint={TILE[i % TILE.length]}
-                    on={corteIds.includes(c.id)}
-                    onPress={() => toggleCut(c.id)}
-                  />
-                ))}
-              </Grid>
-            </Screen>
-          )}
-
-          {step === 'acompanhamentos' && (
-            <Screen title={titles.acompanhamentos} sub={mesaSub(acompanhamentoIds.length)}>
-              <GroupLabel>{mesaGroups.food}</GroupLabel>
-              <Grid>
-                {SIDES.filter((s) => SIDE_FOOD.includes(s.id)).map((s, i) => (
-                  <SelectCard
-                    key={s.id}
-                    icon={<ItemIcon id={s.id} />}
-                    label={s.nome}
-                    tint={TILE[i % TILE.length]}
-                    on={acompanhamentoIds.includes(s.id)}
-                    onPress={() => toggleSide(s.id)}
-                  />
-                ))}
-              </Grid>
-              <View style={{ height: 12 }} />
-              <GroupLabel>{mesaGroups.disposable}</GroupLabel>
-              <Grid>
-                {SIDES.filter((s) => SIDE_DISPOSABLE.includes(s.id)).map((s, i) => (
-                  <SelectCard
-                    key={s.id}
-                    icon={<ItemIcon id={s.id} />}
-                    label={s.nome}
-                    tint={TILE[(i + 2) % TILE.length]}
-                    on={acompanhamentoIds.includes(s.id)}
-                    onPress={() => toggleSide(s.id)}
-                  />
-                ))}
-              </Grid>
-            </Screen>
-          )}
-
-          {step === 'gente' && (
-            <Screen title={titles.gente} sub={sub.gente}>
-              <PeopleRow kind="h" label={peopleCopy.homens} value={homens} onChange={(n) => setPeople('h', n)} />
-              <PeopleRow kind="m" label={peopleCopy.mulheres} value={mulheres} onChange={(n) => setPeople('m', n)} />
-              <PeopleRow kind="c" label={peopleCopy.criancas} value={criancas} onChange={(n) => setPeople('c', n)} />
-              <Text style={styles.liveTotal}>{peopleCopy.live(peopleCount)}</Text>
-            </Screen>
-          )}
-
-          {step === 'fome' && (
-            <Screen title={titles.fome} sub={sub.fome}>
-              {homens > 0 && <HungerRow label={peopleCopy.homens} value={fomeHomem} onChange={setFomeHomem} />}
-              {mulheres > 0 && <HungerRow label={peopleCopy.mulheres} value={fomeMulher} onChange={setFomeMulher} />}
-              {criancas > 0 && <HungerRow label={peopleCopy.criancas} value={fomeCrianca} onChange={setFomeCrianca} />}
-            </Screen>
-          )}
-
-          {step === 'horas' && (
-            <Screen title={titles.horas} sub={sub.horas}>
-              <View style={styles.presetRow}>
-                {HOUR_PRESETS.map((p) => (
-                  <Pressable
-                    key={p.h}
-                    onPress={() => setHoras(p.h)}
-                    style={[styles.preset, horas === p.h && styles.presetOn]}
-                  >
-                    <Text style={[styles.presetH, horas === p.h && styles.presetOnTxt]}>{p.h} h</Text>
-                    <Text style={[styles.presetTag, horas === p.h && styles.presetOnTxt]}>{p.tag}</Text>
-                  </Pressable>
-                ))}
-              </View>
-              <Text style={styles.micro}>{hours.adjust}</Text>
-              <Counter value={horas} onChange={setHoras} min={1} />
-              {lista.ok ? (
-                <View style={styles.preview}>
-                  <Text style={styles.previewKicker}>{hours.about}</Text>
-                  <Text style={styles.previewHero}>
-                    {formatQty(lista.carneKg, 'kg')} {hours.ofMeat}
-                  </Text>
-                </View>
-              ) : null}
-            </Screen>
-          )}
-
-          {step === 'bebida' && (
-            <Screen title={titles.bebida} sub={sub.bebida}>
-              <Radio
-                label={beer.yes}
-                hint={beer.yesHint(peopleCount)}
-                on={bebidaAlcoolica === true}
-                onPress={() => {
-                  setBebidaAlcoolica(true);
-                  if (quantosBebem === 0) {
-                    setQuantosBebem(Math.min(peopleCount, Math.max(1, adults)));
-                  }
-                }}
-              />
-              <Radio
-                label={beer.no}
-                hint={beer.noHint}
-                on={bebidaAlcoolica === false}
-                onPress={() => {
-                  setBebidaAlcoolica(false);
-                  setQuantosBebem(0);
-                }}
-              />
-            </Screen>
-          )}
-
-          {step === 'bebem' && (
-            <Screen title={titles.bebem} sub={bebemSub(peopleCount)}>
-              <Counter value={quantosBebem} onChange={setQuantosBebem} min={0} max={peopleCount} />
-              <Pressable onPress={() => setQuantosBebem(Math.min(peopleCount, adults))} style={styles.ghostLink}>
-                <Text style={styles.link}>{peopleCopy.adultsOnly(adults)}</Text>
-              </Pressable>
-            </Screen>
-          )}
-
-          {step === 'partilha' && (
-            <Screen title={titles.partilha} sub={sub.partilha}>
-              {corteIds.map((id) => {
-                const nome = CUTS.find((c) => c.id === id)?.nome ?? id;
-                const pct = percentuais[id] ?? 0;
-                const kg = lista.ok ? lista.itens.find((i) => i.id === id)?.quantidade : undefined;
-                return (
-                  <View key={id} style={styles.splitCard}>
-                    <View style={styles.splitIcon}>
-                      <ItemIcon id={id} size={22} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.splitName}>{nome}</Text>
-                      {kg != null ? <Text style={styles.splitKg}>{formatQty(kg, 'kg')}</Text> : null}
-                    </View>
-                    <View style={styles.splitRow}>
-                      <Pressable
-                        style={styles.roundBtn}
-                        onPress={() => setPercentuais(rebalancePercents(corteIds, percentuais, id, pct - 5))}
-                      >
-                        <Text style={styles.roundBtnTxt}>−</Text>
-                      </Pressable>
-                      <Text style={styles.splitPct}>{Math.round(pct)}%</Text>
-                      <Pressable
-                        style={styles.roundBtn}
-                        onPress={() => setPercentuais(rebalancePercents(corteIds, percentuais, id, pct + 5))}
-                      >
-                        <Text style={styles.roundBtnTxt}>+</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                );
-              })}
-              <Pressable onPress={() => setPercentuais(equalPercents(corteIds))} style={styles.ghostLink}>
-                <Text style={styles.link}>{split.reset}</Text>
-              </Pressable>
-            </Screen>
-          )}
-
-          {step === 'lista' && (
-            <Screen title={titles.lista} sub={sub.lista}>
-              {!lista.ok ? (
-                <Text style={styles.warn}>{lista.motivo}</Text>
-              ) : (
-                <>
-                  <View style={styles.heroCard}>
-                    <Text style={styles.heroKicker}>{listaCopy.heroKicker}</Text>
-                    <Text style={styles.hero}>{formatQty(lista.carneKg, 'kg')}</Text>
-                    <Text style={styles.heroSub}>{listaCopy.ofMeat}</Text>
-                    <Text style={styles.heroMeta}>{listaCopy.meta(peopleCount, horas)}</Text>
-                  </View>
-
-                  {groupItens(lista.itens).map((g) => (
-                    <View key={g.secao} style={styles.section}>
-                      <Text style={styles.sectionTitle}>{SECAO_LABEL[g.secao]}</Text>
-                      {g.itens.map((item) => (
-                        <ListaRow
-                          key={item.id}
-                          item={item}
-                          value={precos[item.id] ?? ''}
-                          onChange={(t) => setPrecos((p) => ({ ...p, [item.id]: t }))}
-                        />
-                      ))}
-                    </View>
+          <Animated.View key={`${stepIndex}-${step}`} entering={stepEntering}>
+            {step === 'cortes' && (
+              <Screen title={titles.cortes} sub={corteSub(corteIds.length)}>
+                <Grid>
+                  {CUTS.map((c, i) => (
+                    <SelectCard
+                      key={c.id}
+                      icon={<ItemIcon id={c.id} />}
+                      label={c.nome}
+                      tint={TILE[i % TILE.length]}
+                      on={corteIds.includes(c.id)}
+                      onPress={() => toggleCut(c.id)}
+                    />
                   ))}
+                </Grid>
+              </Screen>
+            )}
 
-                  {total > 0 ? (
-                    <View style={styles.totalCard}>
-                      <Text style={styles.totalKicker}>{listaCopy.pricedOf(pricedCount, lista.itens.length)}</Text>
-                      <Text style={styles.total}>{listaCopy.total(formatMoney(total))}</Text>
-                      <Text style={styles.totalHint}>{listaCopy.totalHint}</Text>
+            {step === 'acompanhamentos' && (
+              <Screen title={titles.acompanhamentos} sub={mesaSub(acompanhamentoIds.length)}>
+                <GroupLabel>{mesaGroups.food}</GroupLabel>
+                <Grid>
+                  {SIDES.filter((s) => SIDE_FOOD.includes(s.id)).map((s, i) => (
+                    <SelectCard
+                      key={s.id}
+                      icon={<ItemIcon id={s.id} />}
+                      label={s.nome}
+                      tint={TILE[i % TILE.length]}
+                      on={acompanhamentoIds.includes(s.id)}
+                      onPress={() => toggleSide(s.id)}
+                    />
+                  ))}
+                </Grid>
+                <View style={{ height: 12 }} />
+                <GroupLabel>{mesaGroups.disposable}</GroupLabel>
+                <Grid>
+                  {SIDES.filter((s) => SIDE_DISPOSABLE.includes(s.id)).map((s, i) => (
+                    <SelectCard
+                      key={s.id}
+                      icon={<ItemIcon id={s.id} />}
+                      label={s.nome}
+                      tint={TILE[(i + 2) % TILE.length]}
+                      on={acompanhamentoIds.includes(s.id)}
+                      onPress={() => toggleSide(s.id)}
+                    />
+                  ))}
+                </Grid>
+              </Screen>
+            )}
+
+            {step === 'gente' && (
+              <Screen title={titles.gente} sub={sub.gente}>
+                <PeopleRow kind="h" label={peopleCopy.homens} value={homens} onChange={(n) => setPeople('h', n)} />
+                <PeopleRow kind="m" label={peopleCopy.mulheres} value={mulheres} onChange={(n) => setPeople('m', n)} />
+                <PeopleRow kind="c" label={peopleCopy.criancas} value={criancas} onChange={(n) => setPeople('c', n)} />
+                <Text style={styles.liveTotal}>{peopleCopy.live(peopleCount)}</Text>
+              </Screen>
+            )}
+
+            {step === 'fome' && (
+              <Screen title={titles.fome} sub={sub.fome}>
+                {homens > 0 && <HungerRow label={peopleCopy.homens} value={fomeHomem} onChange={setFomeHomem} />}
+                {mulheres > 0 && <HungerRow label={peopleCopy.mulheres} value={fomeMulher} onChange={setFomeMulher} />}
+                {criancas > 0 && <HungerRow label={peopleCopy.criancas} value={fomeCrianca} onChange={setFomeCrianca} />}
+              </Screen>
+            )}
+
+            {step === 'horas' && (
+              <Screen title={titles.horas} sub={sub.horas}>
+                <View style={styles.presetRow}>
+                  {HOUR_PRESETS.map((p) => (
+                    <PressScale
+                      key={p.h}
+                      haptic="selection"
+                      onPress={() => setHoras(p.h)}
+                      style={[styles.preset, horas === p.h && styles.presetOn]}
+                    >
+                      <Text style={[styles.presetH, horas === p.h && styles.presetOnTxt]}>{p.h} h</Text>
+                      <Text style={[styles.presetTag, horas === p.h && styles.presetOnTxt]}>{p.tag}</Text>
+                    </PressScale>
+                  ))}
+                </View>
+                <Text style={styles.micro}>{hours.adjust}</Text>
+                <Counter value={horas} onChange={setHoras} min={1} />
+                {lista.ok ? (
+                  <Animated.View entering={reduceMotion ? undefined : enterAppear} style={styles.preview}>
+                    <Text style={styles.previewKicker}>{hours.about}</Text>
+                    <Text style={styles.previewHero}>
+                      {formatQty(lista.carneKg, 'kg')} {hours.ofMeat}
+                    </Text>
+                  </Animated.View>
+                ) : null}
+              </Screen>
+            )}
+
+            {step === 'bebida' && (
+              <Screen title={titles.bebida} sub={sub.bebida}>
+                <Radio
+                  label={beer.yes}
+                  hint={beer.yesHint(peopleCount)}
+                  on={bebidaAlcoolica === true}
+                  onPress={() => {
+                    setBebidaAlcoolica(true);
+                    if (quantosBebem === 0) {
+                      setQuantosBebem(Math.min(peopleCount, Math.max(1, adults)));
+                    }
+                  }}
+                />
+                <Radio
+                  label={beer.no}
+                  hint={beer.noHint}
+                  on={bebidaAlcoolica === false}
+                  onPress={() => {
+                    setBebidaAlcoolica(false);
+                    setQuantosBebem(0);
+                  }}
+                />
+              </Screen>
+            )}
+
+            {step === 'bebem' && (
+              <Screen title={titles.bebem} sub={bebemSub(peopleCount)}>
+                <Counter value={quantosBebem} onChange={setQuantosBebem} min={0} max={peopleCount} />
+                <PressScale
+                  haptic="selection"
+                  onPress={() => setQuantosBebem(Math.min(peopleCount, adults))}
+                  style={styles.ghostLink}
+                >
+                  <Text style={styles.link}>{peopleCopy.adultsOnly(adults)}</Text>
+                </PressScale>
+              </Screen>
+            )}
+
+            {step === 'partilha' && (
+              <Screen title={titles.partilha} sub={sub.partilha}>
+                {corteIds.map((id) => {
+                  const nome = CUTS.find((c) => c.id === id)?.nome ?? id;
+                  const pct = percentuais[id] ?? 0;
+                  const kg = lista.ok ? lista.itens.find((i) => i.id === id)?.quantidade : undefined;
+                  return (
+                    <View key={id} style={styles.splitCard}>
+                      <View style={styles.splitIcon}>
+                        <ItemIcon id={id} size={22} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.splitName}>{nome}</Text>
+                        {kg != null ? <Text style={styles.splitKg}>{formatQty(kg, 'kg')}</Text> : null}
+                      </View>
+                      <View style={styles.splitRow}>
+                        <PressScale
+                          haptic="light"
+                          style={styles.roundBtn}
+                          onPress={() => setPercentuais(rebalancePercents(corteIds, percentuais, id, pct - 5))}
+                        >
+                          <Text style={styles.roundBtnTxt}>−</Text>
+                        </PressScale>
+                        <Text style={styles.splitPct}>{Math.round(pct)}%</Text>
+                        <PressScale
+                          haptic="light"
+                          style={styles.roundBtn}
+                          onPress={() => setPercentuais(rebalancePercents(corteIds, percentuais, id, pct + 5))}
+                        >
+                          <Text style={styles.roundBtnTxt}>+</Text>
+                        </PressScale>
+                      </View>
                     </View>
-                  ) : (
-                    <Text style={styles.microLeft}>{listaCopy.noPrices}</Text>
-                  )}
-                </>
-              )}
-              <AdSlot
-                adsRemoved={monetization.adsRemoved}
-                priceLabel={monetization.priceLabel}
-                busy={monetization.busy}
-                onRemoveAds={() => void monetization.removeAds()}
-                onRestore={() => void monetization.restore()}
-                onPrivacy={() => setShowPrivacy(true)}
-              />
-              <Pressable
-                style={[styles.cta, styles.listaCopy, !canContinue() && styles.ctaOff]}
-                onPress={copyLista}
-                disabled={!canContinue()}
-                accessibilityRole="button"
-              >
-                <Text style={styles.ctaTxt}>{copied ? cta.copied : cta.copy}</Text>
-              </Pressable>
-            </Screen>
-          )}
+                  );
+                })}
+                <PressScale
+                  haptic="selection"
+                  onPress={() => setPercentuais(equalPercents(corteIds))}
+                  style={styles.ghostLink}
+                >
+                  <Text style={styles.link}>{split.reset}</Text>
+                </PressScale>
+              </Screen>
+            )}
+
+            {step === 'lista' && (
+              <Screen title={titles.lista} sub={sub.lista}>
+                {!lista.ok ? (
+                  <Text style={styles.warn}>{lista.motivo}</Text>
+                ) : (
+                  <>
+                    <Animated.View entering={reduceMotion ? undefined : enterHero} style={styles.heroCard}>
+                      <Text style={styles.heroKicker}>{listaCopy.heroKicker}</Text>
+                      <Text style={styles.hero}>{formatQty(lista.carneKg, 'kg')}</Text>
+                      <Text style={styles.heroSub}>{listaCopy.ofMeat}</Text>
+                      <Text style={styles.heroMeta}>{listaCopy.meta(peopleCount, horas)}</Text>
+                    </Animated.View>
+
+                    {groupItens(lista.itens).map((g) => (
+                      <View key={g.secao} style={styles.section}>
+                        <Text style={styles.sectionTitle}>{SECAO_LABEL[g.secao]}</Text>
+                        {g.itens.map((item) => (
+                          <ListaRow
+                            key={item.id}
+                            item={item}
+                            value={precos[item.id] ?? ''}
+                            onChange={(t) => setPrecos((p) => ({ ...p, [item.id]: t }))}
+                          />
+                        ))}
+                      </View>
+                    ))}
+
+                    {total > 0 ? (
+                      <Animated.View entering={reduceMotion ? undefined : enterAppear} style={styles.totalCard}>
+                        <Text style={styles.totalKicker}>{listaCopy.pricedOf(pricedCount, lista.itens.length)}</Text>
+                        <Text style={styles.total}>{listaCopy.total(formatMoney(total))}</Text>
+                        <Text style={styles.totalHint}>{listaCopy.totalHint}</Text>
+                      </Animated.View>
+                    ) : (
+                      <Text style={styles.microLeft}>{listaCopy.noPrices}</Text>
+                    )}
+                  </>
+                )}
+                <AdSlot
+                  adsRemoved={monetization.adsRemoved}
+                  priceLabel={monetization.priceLabel}
+                  busy={monetization.busy}
+                  onRemoveAds={() => void monetization.removeAds()}
+                  onRestore={() => void monetization.restore()}
+                  onPrivacy={() => setShowPrivacy(true)}
+                />
+                <CtaPressable
+                  enabled={canContinue()}
+                  success={copied}
+                  haptic="success"
+                  onPress={copyLista}
+                  style={[styles.cta, styles.listaCopy]}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.ctaTxt}>{copied ? cta.copied : cta.copy}</Text>
+                </CtaPressable>
+              </Screen>
+            )}
+          </Animated.View>
         </ScrollView>
 
         {step !== 'lista' ? (
           <View style={styles.footer}>
-            <Pressable
-              style={[styles.cta, !canContinue() && styles.ctaOff]}
-              onPress={next}
-              disabled={!canContinue()}
-            >
+            <CtaPressable enabled={canContinue()} haptic="selection" onPress={next} style={styles.cta}>
               <Text style={styles.ctaTxt}>{ctaLabel()}</Text>
-            </Pressable>
+            </CtaPressable>
           </View>
         ) : null}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+}
+
+function ProgressFill({ progress, reduceMotion }: { progress: number; reduceMotion: boolean }) {
+  const p = useSharedValue(progress);
+
+  useEffect(() => {
+    p.value = reduceMotion ? progress : withTiming(progress, { duration: stepMs, easing: easeOut });
+  }, [p, progress, reduceMotion]);
+
+  const style = useAnimatedStyle(() => ({
+    width: `${p.value * 100}%`,
+  }));
+
+  return <Animated.View style={[styles.progressFill, style]} />;
 }
 
 function PeopleRow({
@@ -640,6 +686,5 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
   },
-  ctaOff: { backgroundColor: C.ctaOff },
   ctaTxt: { color: C.card, fontWeight: '800', fontSize: 16 },
 });

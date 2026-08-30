@@ -1,6 +1,126 @@
-import { type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { type ReactNode, useEffect } from 'react';
+import { Pressable, type PressableProps, StyleSheet, Text, TextInput, View } from 'react-native';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import {
+  appearMs,
+  easeOut,
+  enterAppear,
+  enterCheck,
+  playHaptic,
+  pressMs,
+  pressOpacity,
+  pressScale,
+  useReduceMotion,
+  type HapticKind,
+} from './motion';
 import { C } from './theme';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+type PressScaleProps = PressableProps & {
+  haptic?: HapticKind;
+  extraStyle?: object;
+};
+
+export function PressScale({
+  haptic,
+  extraStyle,
+  style,
+  disabled,
+  onPress,
+  onPressIn,
+  onPressOut,
+  children,
+  ...rest
+}: PressScaleProps) {
+  const reduce = useReduceMotion();
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  return (
+    <AnimatedPressable
+      {...rest}
+      disabled={disabled}
+      style={[style, extraStyle, pressStyle]}
+      onPressIn={(e) => {
+        if (!disabled && !reduce) {
+          scale.value = withTiming(pressScale, { duration: pressMs, easing: easeOut });
+          opacity.value = withTiming(pressOpacity, { duration: pressMs, easing: easeOut });
+        }
+        onPressIn?.(e);
+      }}
+      onPressOut={(e) => {
+        scale.value = withTiming(1, { duration: pressMs, easing: easeOut });
+        opacity.value = withTiming(1, { duration: pressMs, easing: easeOut });
+        onPressOut?.(e);
+      }}
+      onPress={(e) => {
+        if (haptic) playHaptic(haptic);
+        onPress?.(e);
+      }}
+    >
+      {children}
+    </AnimatedPressable>
+  );
+}
+
+export function CtaPressable({
+  enabled,
+  success = false,
+  haptic,
+  style,
+  children,
+  onPress,
+  ...rest
+}: PressScaleProps & { enabled: boolean; success?: boolean }) {
+  const reduce = useReduceMotion();
+  const fill = useSharedValue(enabled ? 1 : 0);
+  const ok = useSharedValue(success ? 1 : 0);
+
+  useEffect(() => {
+    fill.value = reduce
+      ? enabled
+        ? 1
+        : 0
+      : withTiming(enabled ? 1 : 0, { duration: pressMs, easing: easeOut });
+  }, [enabled, fill, reduce]);
+
+  useEffect(() => {
+    ok.value = reduce
+      ? success
+        ? 1
+        : 0
+      : withTiming(success ? 1 : 0, { duration: appearMs, easing: easeOut });
+  }, [ok, reduce, success]);
+
+  const fillStyle = useAnimatedStyle(() => {
+    const idle = interpolateColor(fill.value, [0, 1], [C.ctaOff, C.ink]);
+    return { backgroundColor: interpolateColor(ok.value, [0, 1], [idle, C.ok]) };
+  });
+
+  return (
+    <PressScale
+      {...rest}
+      disabled={!enabled}
+      haptic={haptic}
+      onPress={onPress}
+      style={style}
+      extraStyle={fillStyle}
+    >
+      {children}
+    </PressScale>
+  );
+}
 
 export function Screen({ title, sub, children }: { title: string; sub: string; children: ReactNode }) {
   return (
@@ -33,8 +153,10 @@ export function SelectCard({
   on: boolean;
   onPress: () => void;
 }) {
+  const reduce = useReduceMotion();
   return (
-    <Pressable
+    <PressScale
+      haptic="selection"
       onPress={onPress}
       style={[styles.tile, on && styles.tileOn]}
       accessibilityRole="button"
@@ -42,13 +164,13 @@ export function SelectCard({
       accessibilityLabel={label}
     >
       {on ? (
-        <View style={styles.check}>
+        <Animated.View entering={reduce ? undefined : enterCheck} style={styles.check}>
           <Text style={styles.checkTxt}>✓</Text>
-        </View>
+        </Animated.View>
       ) : null}
       <View style={[styles.iconBox, { backgroundColor: tint }]}>{icon}</View>
       <Text style={[styles.tileLabel, !on && styles.tileLabelOff]}>{label}</Text>
-    </Pressable>
+    </PressScale>
   );
 }
 
@@ -63,14 +185,19 @@ export function Radio({
   on: boolean;
   onPress: () => void;
 }) {
+  const reduce = useReduceMotion();
   return (
-    <Pressable onPress={onPress} style={[styles.radio, on && styles.radioOn]}>
-      <View style={[styles.dot, on && styles.dotOn]}>{on ? <View style={styles.dotCore} /> : null}</View>
+    <PressScale haptic="selection" onPress={onPress} style={[styles.radio, on && styles.radioOn]}>
+      <View style={[styles.dot, on && styles.dotOn]}>
+        {on ? (
+          <Animated.View entering={reduce ? undefined : enterAppear} style={styles.dotCore} />
+        ) : null}
+      </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.radioTxt}>{label}</Text>
         {hint ? <Text style={styles.radioHint}>{hint}</Text> : null}
       </View>
-    </Pressable>
+    </PressScale>
   );
 }
 
@@ -88,9 +215,14 @@ export function Segmented({
       {options.map((o) => {
         const on = o.id === value;
         return (
-          <Pressable key={o.id} onPress={() => onChange(o.id)} style={[styles.segItem, on && styles.segOn]}>
+          <PressScale
+            key={o.id}
+            haptic="selection"
+            onPress={() => onChange(o.id)}
+            style={[styles.segItem, on && styles.segOn]}
+          >
             <Text style={[styles.segTxt, on && styles.segTxtOn]}>{o.label}</Text>
-          </Pressable>
+          </PressScale>
         );
       })}
     </View>
@@ -111,9 +243,9 @@ export function Counter({
   const clamp = (n: number) => Math.max(min, max == null ? n : Math.min(max, n));
   return (
     <View style={styles.counter}>
-      <Pressable style={styles.roundBtn} onPress={() => onChange(clamp(value - 1))}>
+      <PressScale haptic="light" style={styles.roundBtn} onPress={() => onChange(clamp(value - 1))}>
         <Text style={styles.roundBtnTxt}>−</Text>
-      </Pressable>
+      </PressScale>
       <TextInput
         style={styles.counterInput}
         keyboardType="number-pad"
@@ -123,9 +255,9 @@ export function Counter({
           onChange(clamp(Number.isFinite(n) ? n : min));
         }}
       />
-      <Pressable style={styles.roundBtn} onPress={() => onChange(clamp(value + 1))}>
+      <PressScale haptic="light" style={styles.roundBtn} onPress={() => onChange(clamp(value + 1))}>
         <Text style={styles.roundBtnTxt}>+</Text>
-      </Pressable>
+      </PressScale>
     </View>
   );
 }
