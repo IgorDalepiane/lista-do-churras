@@ -14,7 +14,7 @@ export function unitPriceLabel(unidade: Unit): string {
 }
 
 export function unitPriceHint(item: Pick<ListaItem, 'id' | 'unidade'>): string {
-  if (item.id === 'cerveja') return 'por litro — não o preço da lata';
+  if (item.id === 'cerveja') return 'por litro, não o preço da lata';
   if (item.id === 'gelo') return 'por quilo do saco';
   if (item.unidade === 'un') return 'por unidade';
   if (item.unidade === 'L') return 'por litro';

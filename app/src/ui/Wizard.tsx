@@ -1,5 +1,4 @@
 import * as Clipboard from 'expo-clipboard';
-import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -10,6 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { calcularLista, equalPercents, rebalancePercents } from '../domain/calculate';
 import { CUTS, HUNGER_LABEL, SIDE_DISPOSABLE, SIDE_FOOD, SIDES } from '../domain/catalog';
@@ -181,7 +181,6 @@ export function Wizard() {
   }
 
   function ctaLabel(): string {
-    if (step === 'lista') return copied ? cta.copied : cta.copy;
     if (step === 'acompanhamentos' && acompanhamentoIds.length === 0) return cta.skipMesa;
     if (steps[stepIndex + 1] === 'lista') return cta.seeLista;
     return cta.continue;
@@ -193,11 +192,16 @@ export function Wizard() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-      <StatusBar style="dark" />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.top}>
-          <Pressable style={styles.navCircle} onPress={back} disabled={stepIndex === 0}>
-            <Text style={[styles.navGlyph, stepIndex === 0 && { opacity: 0.25 }]}>‹</Text>
+          <Pressable
+            style={styles.navCircle}
+            onPress={back}
+            disabled={stepIndex === 0}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar"
+          >
+            <Ionicons name="arrow-back" size={22} color={C.ink} style={stepIndex === 0 ? { opacity: 0.25 } : undefined} />
           </Pressable>
           <View style={{ flex: 1 }}>
             <View style={styles.progressTrack}>
@@ -210,7 +214,7 @@ export function Wizard() {
         </View>
 
         <ScrollView
-          contentContainerStyle={styles.scroll}
+          contentContainerStyle={[styles.scroll, step === 'lista' && styles.scrollLista]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
@@ -426,19 +430,29 @@ export function Wizard() {
                 onRestore={() => void monetization.restore()}
                 onPrivacy={() => setShowPrivacy(true)}
               />
+              <Pressable
+                style={[styles.cta, styles.listaCopy, !canContinue() && styles.ctaOff]}
+                onPress={copyLista}
+                disabled={!canContinue()}
+                accessibilityRole="button"
+              >
+                <Text style={styles.ctaTxt}>{copied ? cta.copied : cta.copy}</Text>
+              </Pressable>
             </Screen>
           )}
         </ScrollView>
 
-        <View style={styles.footer}>
-          <Pressable
-            style={[styles.cta, !canContinue() && styles.ctaOff]}
-            onPress={step === 'lista' ? copyLista : next}
-            disabled={!canContinue()}
-          >
-            <Text style={styles.ctaTxt}>{ctaLabel()}</Text>
-          </Pressable>
-        </View>
+        {step !== 'lista' ? (
+          <View style={styles.footer}>
+            <Pressable
+              style={[styles.cta, !canContinue() && styles.ctaOff]}
+              onPress={next}
+              disabled={!canContinue()}
+            >
+              <Text style={styles.ctaTxt}>{ctaLabel()}</Text>
+            </Pressable>
+          </View>
+        ) : null}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -503,11 +517,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  navGlyph: { fontSize: 28, color: C.ink, marginTop: -2 },
   progressTrack: { height: 6, borderRadius: 99, backgroundColor: C.line, overflow: 'hidden' },
   progressFill: { height: 6, backgroundColor: C.accent, borderRadius: 99 },
   stepCaption: { color: C.muted, fontSize: 12, marginTop: 6, fontWeight: '600' },
   scroll: { paddingHorizontal: 20, paddingBottom: 28 },
+  scrollLista: { paddingBottom: 48 },
   liveTotal: {
     marginTop: 8,
     textAlign: 'center',
@@ -619,6 +633,7 @@ const styles = StyleSheet.create({
   totalHint: { color: C.muted, marginTop: 6, fontSize: 13, lineHeight: 18 },
   warn: { color: C.accent, fontSize: 16 },
   footer: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
+  listaCopy: { marginTop: 28 },
   cta: {
     backgroundColor: C.ink,
     borderRadius: 999,

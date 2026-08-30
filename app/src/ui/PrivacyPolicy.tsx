@@ -1,3 +1,5 @@
+import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { privacy } from './copy';
@@ -6,9 +8,11 @@ import { C } from './theme';
 export function PrivacyPolicy({ onBack }: { onBack?: () => void }) {
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+      <StatusBar style="dark" />
       {onBack ? (
         <Pressable onPress={onBack} style={styles.back} accessibilityRole="button" accessibilityLabel="Voltar">
-          <Text style={styles.backTxt}>‹ Voltar</Text>
+          <Ionicons name="arrow-back" size={22} color={C.accent} />
+          <Text style={styles.backTxt}>Voltar</Text>
         </Pressable>
       ) : null}
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -27,7 +31,15 @@ export function PrivacyPolicy({ onBack }: { onBack?: () => void }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
-  back: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
+  back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 4,
+    minHeight: 48,
+  },
   backTxt: { color: C.accent, fontWeight: '700', fontSize: 16 },
   scroll: { paddingHorizontal: 20, paddingBottom: 40 },
   title: { color: C.ink, fontSize: 30, fontWeight: '800', letterSpacing: -0.7, marginTop: 8 },

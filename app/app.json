@@ -61,7 +61,7 @@
     ]
   ],
   "extra": {
-    "iapProductId": "remove_ads",
+    "iapProductId": "lista_sem_anuncio",
     "admobBannerUnitId": "",
     "adsUseTestUnits": true,
     "eas": {

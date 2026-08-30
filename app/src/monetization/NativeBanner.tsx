@@ -7,7 +7,7 @@ import {
   TestIds,
 } from 'react-native-google-mobile-ads';
 import { C } from '../ui/theme';
-import { Fallback, LOAD_MS, QuietPayLinks, SLOT_MIN, type PayProps } from './Fallback';
+import { LOAD_MS, PaywallCard, SLOT_MIN, type PayProps } from './Fallback';
 import { ADMOB_BANNER_UNIT_ID, ADS_USE_TEST_UNITS } from './runtime';
 
 export function NativeBanner(props: PayProps) {
@@ -60,7 +60,7 @@ export function NativeBanner(props: PayProps) {
           />
         </View>
       ) : null}
-      {loaded && !failed ? <QuietPayLinks {...props} /> : <Fallback {...props} />}
+      <PaywallCard {...props} />
     </View>
   );
 }

@@ -14,61 +14,79 @@ export type PayProps = {
   onPrivacy: () => void;
 };
 
-export function Fallback({ priceLabel, busy, onRemoveAds, onRestore, onPrivacy }: PayProps) {
+export function PaywallCard({ priceLabel, busy, onRemoveAds, onRestore, onPrivacy }: PayProps) {
   return (
-    <View style={styles.slot} accessibilityLabel="Espaço de anúncio">
-      <Text style={styles.failTitle}>{adsCopy.failTitle}</Text>
-      <Text style={styles.failBody}>{adsCopy.failBody}</Text>
-      <Pressable onPress={onRemoveAds} disabled={busy} style={styles.buy} accessibilityRole="button">
-        <Text style={styles.buyTxt}>{adsCopy.remove(priceLabel)}</Text>
+    <View style={styles.card} accessibilityLabel={adsCopy.title}>
+      <Text style={styles.kicker}>{adsCopy.kicker}</Text>
+      <Text style={styles.title}>{adsCopy.title}</Text>
+      <Text style={styles.body}>{adsCopy.body}</Text>
+      <Pressable
+        onPress={onRemoveAds}
+        disabled={busy}
+        style={[styles.buy, busy && styles.buyOff]}
+        accessibilityRole="button"
+        accessibilityLabel={adsCopy.buy(priceLabel)}
+      >
+        <Text style={styles.buyTxt}>{adsCopy.buy(priceLabel)}</Text>
       </Pressable>
-      <Pressable onPress={onRestore} disabled={busy} style={styles.linkBtn} accessibilityRole="button">
-        <Text style={styles.link}>{adsCopy.restore}</Text>
-      </Pressable>
-      <Pressable onPress={onPrivacy} style={styles.linkBtn} accessibilityRole="button">
-        <Text style={styles.link}>{listaCopy.privacy}</Text>
-      </Pressable>
-    </View>
-  );
-}
-
-export function QuietPayLinks({ priceLabel, busy, onRemoveAds, onRestore, onPrivacy }: PayProps) {
-  return (
-    <View style={styles.quiet}>
-      <Pressable onPress={onRemoveAds} disabled={busy} accessibilityRole="button">
-        <Text style={styles.link}>{adsCopy.remove(priceLabel)}</Text>
-      </Pressable>
-      <Pressable onPress={onRestore} disabled={busy} accessibilityRole="button">
-        <Text style={styles.link}>{adsCopy.restore}</Text>
-      </Pressable>
-      <Pressable onPress={onPrivacy} accessibilityRole="button">
-        <Text style={styles.link}>{listaCopy.privacy}</Text>
-      </Pressable>
+      <View style={styles.meta}>
+        <Pressable
+          onPress={onRestore}
+          disabled={busy}
+          style={styles.metaBtn}
+          accessibilityRole="button"
+          hitSlop={8}
+        >
+          <Text style={styles.metaLink}>{adsCopy.restore}</Text>
+        </Pressable>
+        <Text style={styles.metaDot} accessibilityElementsHidden>
+          ·
+        </Text>
+        <Pressable onPress={onPrivacy} style={styles.metaBtn} accessibilityRole="button" hitSlop={8}>
+          <Text style={styles.metaLink}>{listaCopy.privacy}</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  slot: {
-    minHeight: SLOT_MIN,
+  card: {
     borderRadius: 16,
     backgroundColor: C.card,
-    padding: 16,
+    padding: 18,
     marginTop: 16,
     borderWidth: 1,
     borderColor: C.line,
   },
-  failTitle: { color: C.ink, fontWeight: '800', fontSize: 16 },
-  failBody: { color: C.muted, marginTop: 6, lineHeight: 20, fontSize: 14 },
+  kicker: {
+    color: C.accent,
+    fontWeight: '700',
+    fontSize: 12,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  title: { color: C.ink, fontWeight: '800', fontSize: 22, marginTop: 8, letterSpacing: -0.4 },
+  body: { color: C.muted, marginTop: 8, lineHeight: 21, fontSize: 14 },
   buy: {
-    marginTop: 14,
+    marginTop: 16,
     backgroundColor: C.ink,
     borderRadius: 999,
-    paddingVertical: 12,
+    paddingVertical: 14,
     alignItems: 'center',
+    minHeight: 48,
+    justifyContent: 'center',
   },
+  buyOff: { backgroundColor: C.ctaOff },
   buyTxt: { color: C.card, fontWeight: '800', fontSize: 15 },
-  linkBtn: { paddingTop: 10 },
-  link: { color: C.accent, fontWeight: '700', textAlign: 'center', fontSize: 13 },
-  quiet: { marginTop: 10, gap: 8, alignItems: 'center' },
+  meta: {
+    marginTop: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  metaBtn: { paddingVertical: 12, minHeight: 48, justifyContent: 'center' },
+  metaLink: { color: C.accent, fontWeight: '700', fontSize: 13 },
+  metaDot: { color: C.muted, fontWeight: '700', fontSize: 13 },
 });

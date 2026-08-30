@@ -43,7 +43,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     plugins,
     extra: {
       ...expoConfig.extra,
-      iapProductId: expoConfig.extra?.iapProductId ?? 'remove_ads',
+      iapProductId: expoConfig.extra?.iapProductId ?? 'lista_sem_anuncio',
       admobBannerUnitId: bannerUnitId,
       adsUseTestUnits: !liveAds,
     },

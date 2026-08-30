@@ -7,7 +7,7 @@ function extraString(key: string): string | undefined {
   return typeof value === 'string' ? value : undefined;
 }
 
-export const IAP_PRODUCT_ID = extraString('iapProductId') ?? 'remove_ads';
+export const IAP_PRODUCT_ID = extraString('iapProductId') ?? 'lista_sem_anuncio';
 
 export const ADMOB_BANNER_UNIT_ID = extraString('admobBannerUnitId') ?? '';
 

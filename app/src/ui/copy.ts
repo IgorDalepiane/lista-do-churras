@@ -30,7 +30,7 @@ export function corteSub(count: number): string {
 }
 
 export function mesaSub(count: number): string {
-  if (count === 0) return 'O que mais entra na lista — comida e descartável. Pode pular.';
+  if (count === 0) return 'O que mais entra na lista: comida e descartável. Pode pular.';
   return `${count} item${count > 1 ? 's' : ''} fora da grelha.`;
 }
 
@@ -93,15 +93,16 @@ export const listaCopy = {
     `${n} ${n === 1 ? 'pessoa' : 'pessoas'} · ${h} h de fogo`,
   pricedOf: (n: number, total: number) => `${n} de ${total} com preço`,
   total: (money: string) => `Total estimado ${money}`,
-  totalHint: 'Ideia de quanto vai dar — não a conta de cada um.',
+  totalHint: 'Ideia de quanto vai dar, não a conta de cada um.',
   noPrices: 'Sem preço a lista ainda serve: é o que comprar.',
   privacy: 'Privacidade',
 };
 
 export const adsCopy = {
-  failTitle: 'O anúncio não carregou.',
-  failBody: 'Se quiser ajudar o app a continuar de graça, tira os anúncios.',
-  remove: (price: string) => `Remover anúncios — ${price}`,
+  kicker: 'Compra única',
+  title: 'Leva o app',
+  body: 'Lista do Churras sem anúncio, na conta da loja. Vale em qualquer aparelho com essa mesma conta. O cálculo continua o mesmo.',
+  buy: (price: string) => `Comprar · ${price}`,
   restore: 'Restaurar compra',
   defaultPrice: 'R$ 9,90',
 };
@@ -117,11 +118,11 @@ export const privacy = {
     },
     {
       heading: 'Anúncios',
-      body: 'Na versão grátis, o Google AdMob pode mostrar um anúncio na tela da lista. O anúncio não cobre os kg. Se o anúncio não carregar, aparece um convite para tirar anúncios. O Google pode tratar dados do anúncio conforme a política dele; o formulário de consentimento aparece quando a lei pede.',
+      body: 'Na versão grátis, o Google AdMob pode mostrar um anúncio na tela da lista. O anúncio não cobre os kg. Abaixo da lista tem um convite para levar Lista do Churras sem anúncio. O Google pode tratar dados do anúncio conforme a política dele. O formulário de consentimento ou o pedido do sistema aparece quando a lei ou o sistema pede.',
     },
     {
-      heading: 'Compra na Play',
-      body: 'Remover anúncios é uma compra única na Google Play. A Play confirma o pagamento. Guardamos só no aparelho se a compra já foi feita, para não mostrar anúncio de novo.',
+      heading: 'Compra na loja',
+      body: 'Lista do Churras sem anúncio é uma compra única na Google Play ou na App Store, ligada à conta dessa loja. Não passa de uma loja para a outra. A loja confirma o pagamento. Neste aparelho o app só guarda um recado local para não mostrar anúncio de novo. Se trocar de celular, use Restaurar compra. O app não cria conta.',
     },
     {
       heading: 'O que a gente não faz',
