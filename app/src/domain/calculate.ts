@@ -2,11 +2,10 @@ import { BASE_G, CUTS, HUNGER_MUL, SIDES } from './catalog';
 import type { ChurrascoInput, CutId, Hunger, Lista, ListaItem, SideId } from './types';
 
 export function durationMul(hours: number): number {
-  if (hours < 4) return 0.85;
-  if (hours <= 8) return 1;
-  if (hours <= 12) return 1.35;
-  if (hours <= 16) return 1.6;
-  return 2;
+  const h = Math.min(12, Math.max(1, hours));
+  if (h < 4) return 0.85;
+  if (h >= 12) return 1.4;
+  return roundKg(1 + ((h - 4) / 8) * 0.4);
 }
 
 export function equalPercents(ids: string[]): Record<string, number> {
@@ -76,7 +75,18 @@ function charcoalKg(meatKg: number, hours: number, adults: number): number {
 
 function beerL(drinkers: number, hours: number): number {
   if (drinkers <= 0) return 0;
-  return roundKg(Math.max(1, 0.5 * hours * drinkers));
+  const h = Math.min(12, hours);
+  return roundKg(Math.max(1, 0.5 * h * drinkers));
+}
+
+function sodaL(nonDrinkers: number, hours: number): number {
+  if (nonDrinkers <= 0) return 0;
+  return roundKg(0.6 * nonDrinkers * durationMul(hours));
+}
+
+function waterL(people: number, hours: number): number {
+  if (people <= 0) return 0;
+  return roundKg(0.3 * people * durationMul(hours));
 }
 
 function peopleTotal(input: ChurrascoInput): number {
@@ -163,6 +173,33 @@ export function calcularLista(input: ChurrascoInput): Lista {
       unidade: 'L',
       secao: 'bebida',
     });
+  }
+
+  const drinkers = input.bebidaAlcoolica ? input.quantosBebem : 0;
+  const nonDrinkers = people - drinkers;
+  if (input.incluirRefrigerante) {
+    const quantidade = sodaL(nonDrinkers, input.horas);
+    if (quantidade > 0) {
+      itens.push({
+        id: 'refrigerante',
+        nome: 'Refrigerante',
+        quantidade,
+        unidade: 'L',
+        secao: 'bebida',
+      });
+    }
+  }
+  if (input.incluirAgua) {
+    const quantidade = waterL(people, input.horas);
+    if (quantidade > 0) {
+      itens.push({
+        id: 'agua',
+        nome: 'Água',
+        quantidade,
+        unidade: 'L',
+        secao: 'bebida',
+      });
+    }
   }
 
   return { ok: true, carneKg, itens };

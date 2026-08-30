@@ -331,7 +331,7 @@ export const styles = StyleSheet.create({
   radioHint: { color: C.muted, fontSize: 13, marginTop: 2 },
   seg: {
     flexDirection: 'row',
-    backgroundColor: C.card,
+    backgroundColor: C.bg,
     borderRadius: 16,
     padding: 4,
     gap: 4,

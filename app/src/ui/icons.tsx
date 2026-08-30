@@ -19,6 +19,8 @@ const ITEMS: Record<string, ImageSourcePropType> = {
   prato: require('../../assets/items/prato.png'),
   carvao: require('../../assets/items/carvao.png'),
   cerveja: require('../../assets/items/cerveja.png'),
+  refrigerante: require('../../assets/items/refrigerante.png'),
+  agua: require('../../assets/items/agua.png'),
 };
 
 export function ItemIcon({ id, size = 28 }: { id: string; size?: number }) {

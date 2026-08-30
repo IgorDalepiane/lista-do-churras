@@ -35,14 +35,14 @@ export function PaywallCard({ priceLabel, busy, onRemoveAds, onRestore, onPrivac
           disabled={busy}
           style={styles.metaBtn}
           accessibilityRole="button"
-          hitSlop={8}
+          hitSlop={12}
         >
           <Text style={styles.metaLink}>{adsCopy.restore}</Text>
         </Pressable>
         <Text style={styles.metaDot} accessibilityElementsHidden>
           ·
         </Text>
-        <Pressable onPress={onPrivacy} style={styles.metaBtn} accessibilityRole="button" hitSlop={8}>
+        <Pressable onPress={onPrivacy} style={styles.metaBtn} accessibilityRole="button" hitSlop={12}>
           <Text style={styles.metaLink}>{listaCopy.privacy}</Text>
         </Pressable>
       </View>
@@ -52,10 +52,9 @@ export function PaywallCard({ priceLabel, busy, onRemoveAds, onRestore, onPrivac
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: C.card,
-    padding: 18,
-    marginTop: 16,
+    padding: 16,
     borderWidth: 1,
     borderColor: C.line,
   },
@@ -86,7 +85,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
-  metaBtn: { paddingVertical: 12, minHeight: 48, justifyContent: 'center' },
+  metaBtn: { justifyContent: 'center' },
   metaLink: { color: C.accent, fontWeight: '700', fontSize: 13 },
   metaDot: { color: C.muted, fontWeight: '700', fontSize: 13 },
 });

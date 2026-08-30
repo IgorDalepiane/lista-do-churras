@@ -84,6 +84,8 @@ export function Wizard() {
   const [acompanhamentoIds, setAcompanhamentoIds] = useState<SideId[]>([]);
   const [bebidaAlcoolica, setBebidaAlcoolica] = useState<boolean | null>(null);
   const [quantosBebem, setQuantosBebem] = useState(0);
+  const [incluirRefrigerante, setIncluirRefrigerante] = useState(true);
+  const [incluirAgua, setIncluirAgua] = useState(false);
   const [precos, setPrecos] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
@@ -92,6 +94,7 @@ export function Wizard() {
   const scrollRef = useRef<ScrollView>(null);
   const reduceMotion = useReduceMotion();
   const monetization = useMonetization();
+  const copySticky = monetization.adsRemoved;
 
   const peopleCount = homens + mulheres + criancas;
   const adults = homens + mulheres;
@@ -123,6 +126,8 @@ export function Wizard() {
         acompanhamentoIds,
         bebidaAlcoolica: Boolean(bebidaAlcoolica),
         quantosBebem: Math.min(quantosBebem, peopleCount),
+        incluirRefrigerante,
+        incluirAgua,
       }),
     [
       homens,
@@ -137,6 +142,8 @@ export function Wizard() {
       acompanhamentoIds,
       bebidaAlcoolica,
       quantosBebem,
+      incluirRefrigerante,
+      incluirAgua,
       peopleCount,
     ],
   );
@@ -252,7 +259,7 @@ export function Wizard() {
 
         <ScrollView
           ref={scrollRef}
-          contentContainerStyle={[styles.scroll, step === 'lista' && styles.scrollLista]}
+          contentContainerStyle={[styles.scroll, step === 'lista' && !copySticky && styles.scrollLista]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
@@ -339,7 +346,7 @@ export function Wizard() {
                   ))}
                 </View>
                 <Text style={styles.micro}>{hours.adjust}</Text>
-                <Counter value={horas} onChange={setHoras} min={1} />
+                <Counter value={horas} onChange={setHoras} min={1} max={12} />
                 {lista.ok ? (
                   <Animated.View entering={reduceMotion ? undefined : enterAppear} style={styles.preview}>
                     <Text style={styles.previewKicker}>{hours.about}</Text>
@@ -372,6 +379,20 @@ export function Wizard() {
                     setBebidaAlcoolica(false);
                     setQuantosBebem(0);
                   }}
+                />
+                <View style={{ height: 12 }} />
+                <GroupLabel>{beer.extra}</GroupLabel>
+                <Radio
+                  label={beer.soda}
+                  hint={beer.sodaHint}
+                  on={incluirRefrigerante}
+                  onPress={() => setIncluirRefrigerante((v) => !v)}
+                />
+                <Radio
+                  label={beer.water}
+                  hint={beer.waterHint}
+                  on={incluirAgua}
+                  onPress={() => setIncluirAgua((v) => !v)}
                 />
               </Screen>
             )}
@@ -472,34 +493,51 @@ export function Wizard() {
                     )}
                   </>
                 )}
-                <AdSlot
-                  adsRemoved={monetization.adsRemoved}
-                  priceLabel={monetization.priceLabel}
-                  busy={monetization.busy}
-                  onRemoveAds={() => void monetization.removeAds()}
-                  onRestore={() => void monetization.restore()}
-                  onPrivacy={() => setShowPrivacy(true)}
-                />
-                <CtaPressable
-                  enabled={canContinue()}
-                  success={copied}
-                  haptic="success"
-                  onPress={copyLista}
-                  style={[styles.cta, styles.listaCopy]}
-                  accessibilityRole="button"
-                >
-                  <Text style={styles.ctaTxt}>{copied ? cta.copied : cta.copy}</Text>
-                </CtaPressable>
+                {!copySticky ? (
+                  <>
+                    <AdSlot
+                      adsRemoved={monetization.adsRemoved}
+                      priceLabel={monetization.priceLabel}
+                      busy={monetization.busy}
+                      onRemoveAds={() => void monetization.removeAds()}
+                      onRestore={() => void monetization.restore()}
+                      onPrivacy={() => setShowPrivacy(true)}
+                    />
+                    <CtaPressable
+                      enabled={canContinue()}
+                      success={copied}
+                      haptic="success"
+                      onPress={copyLista}
+                      style={[styles.cta, styles.listaCopy]}
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.ctaTxt}>{copied ? cta.copied : cta.copy}</Text>
+                    </CtaPressable>
+                  </>
+                ) : null}
               </Screen>
             )}
           </Animated.View>
         </ScrollView>
 
-        {step !== 'lista' ? (
+        {step !== 'lista' || copySticky ? (
           <View style={styles.footer}>
-            <CtaPressable enabled={canContinue()} haptic="selection" onPress={next} style={styles.cta}>
-              <Text style={styles.ctaTxt}>{ctaLabel()}</Text>
-            </CtaPressable>
+            {step === 'lista' ? (
+              <CtaPressable
+                enabled={canContinue()}
+                success={copied}
+                haptic="success"
+                onPress={copyLista}
+                style={styles.cta}
+                accessibilityRole="button"
+              >
+                <Text style={styles.ctaTxt}>{copied ? cta.copied : cta.copy}</Text>
+              </CtaPressable>
+            ) : (
+              <CtaPressable enabled={canContinue()} haptic="selection" onPress={next} style={styles.cta}>
+                <Text style={styles.ctaTxt}>{ctaLabel()}</Text>
+              </CtaPressable>
+            )}
           </View>
         ) : null}
       </KeyboardAvoidingView>
@@ -584,7 +622,7 @@ const styles = StyleSheet.create({
   progressFill: { height: 6, backgroundColor: C.accent, borderRadius: 99 },
   stepCaption: { color: C.muted, fontSize: 12, marginTop: 6, fontWeight: '600' },
   scroll: { paddingHorizontal: 20, paddingBottom: 28 },
-  scrollLista: { paddingBottom: 48 },
+  scrollLista: { paddingBottom: 8 },
   liveTotal: {
     marginTop: 8,
     textAlign: 'center',
@@ -609,7 +647,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   peopleLabel: { color: C.ink, fontWeight: '700', fontSize: 16 },
-  hungerCard: { marginBottom: 16 },
+  hungerCard: {
+    backgroundColor: C.card,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 12,
+    gap: 10,
+  },
   presetRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   preset: {
     paddingHorizontal: 14,

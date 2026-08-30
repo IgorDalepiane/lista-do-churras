@@ -18,6 +18,8 @@ test('rótulo de preço deixa a unidade explícita', () => {
 test('cerveja avisa que o preço é por litro, não por lata', () => {
   assert.match(unitPriceHint({ id: 'cerveja', unidade: 'L' }), /litro/i);
   assert.match(unitPriceHint({ id: 'cerveja', unidade: 'L' }), /lata/i);
+  assert.match(unitPriceHint({ id: 'refrigerante', unidade: 'L' }), /2 L/i);
+  assert.match(unitPriceHint({ id: 'agua', unidade: 'L' }), /garrafinha/i);
   assert.equal(unitPriceHint({ id: 'pao', unidade: 'un' }), 'por unidade');
   assert.equal(unitPriceHint({ id: 'picanha', unidade: 'kg' }), 'por quilo');
 });

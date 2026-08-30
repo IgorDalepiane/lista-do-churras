@@ -31,7 +31,7 @@ export function corteSub(count: number): string {
 
 export function mesaSub(count: number): string {
   if (count === 0) return 'O que mais entra na lista: comida e descartável. Pode pular.';
-  return `${count} item${count > 1 ? 's' : ''} fora da grelha.`;
+  return `${count} ${count > 1 ? 'itens' : 'item'} fora da grelha.`;
 }
 
 export const sub = {
@@ -80,6 +80,11 @@ export const beer = {
   yesHint: (n: number) => `${n} ${n === 1 ? 'pessoa' : 'pessoas'} no total`,
   no: 'Não, só o churrasco',
   noHint: 'A lista fica sem litro de cerveja',
+  extra: 'Também na lista',
+  soda: 'Refrigerante',
+  sodaHint: 'Quem bebe cerveja não entra nessa conta.',
+  water: 'Água',
+  waterHint: 'Muita gente não toma. Liga se for comprar garrafa.',
 };
 
 export const split = {

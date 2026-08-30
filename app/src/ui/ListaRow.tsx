@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: C.card,
     borderRadius: 20,
-    padding: 14,
+    padding: 16,
     marginBottom: 10,
   },
   head: { flexDirection: 'row', alignItems: 'center', gap: 8 },

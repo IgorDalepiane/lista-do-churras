@@ -16,6 +16,8 @@ const base = (over: Partial<ChurrascoInput> = {}): ChurrascoInput => ({
   acompanhamentoIds: [],
   bebidaAlcoolica: false,
   quantosBebem: 0,
+  incluirRefrigerante: false,
+  incluirAgua: false,
   ...over,
 });
 
@@ -126,4 +128,71 @@ test('equal percents somam 100', () => {
 test('durationMul não decresce', () => {
   assert.ok(durationMul(5) >= durationMul(3));
   assert.ok(durationMul(14) >= durationMul(10));
+});
+
+test('4h 6h 8h 12h aumentam a carne', () => {
+  const h4 = calcularLista(base({ horas: 4 }));
+  const h6 = calcularLista(base({ horas: 6 }));
+  const h8 = calcularLista(base({ horas: 8 }));
+  const h12 = calcularLista(base({ horas: 12 }));
+  assert.equal(h4.ok && h6.ok && h8.ok && h12.ok, true);
+  if (h4.ok && h6.ok && h8.ok && h12.ok) {
+    assert.ok(h4.carneKg < h6.carneKg);
+    assert.ok(h6.carneKg < h8.carneKg);
+    assert.ok(h8.carneKg < h12.carneKg);
+  }
+});
+
+test('durationMul teto 12h', () => {
+  assert.equal(durationMul(4), 1);
+  assert.equal(durationMul(6), 1.1);
+  assert.equal(durationMul(8), 1.2);
+  assert.equal(durationMul(12), 1.4);
+  assert.equal(durationMul(12), durationMul(99));
+});
+
+test('refrigerante só para quem não bebe; água é reserva por pessoa', () => {
+  const mixed = calcularLista(
+    base({
+      homens: 6,
+      mulheres: 4,
+      bebidaAlcoolica: true,
+      quantosBebem: 6,
+      incluirRefrigerante: true,
+      incluirAgua: true,
+    }),
+  );
+  assert.equal(mixed.ok, true);
+  if (!mixed.ok) return;
+  const soda = mixed.itens.find((i) => i.id === 'refrigerante');
+  const water = mixed.itens.find((i) => i.id === 'agua');
+  const beerItem = mixed.itens.find((i) => i.id === 'cerveja');
+  assert.equal(soda?.quantidade, 2.4);
+  assert.equal(water?.quantidade, 3);
+  assert.equal(beerItem?.quantidade, 12);
+
+  const allDrink = calcularLista(
+    base({
+      bebidaAlcoolica: true,
+      quantosBebem: 6,
+      incluirRefrigerante: true,
+      incluirAgua: false,
+    }),
+  );
+  assert.equal(allDrink.ok, true);
+  if (!allDrink.ok) return;
+  assert.equal(allDrink.itens.some((i) => i.id === 'refrigerante'), false);
+  assert.equal(allDrink.itens.some((i) => i.id === 'agua'), false);
+
+  const noBeer = calcularLista(
+    base({
+      homens: 10,
+      incluirRefrigerante: true,
+      incluirAgua: true,
+    }),
+  );
+  assert.equal(noBeer.ok, true);
+  if (!noBeer.ok) return;
+  assert.equal(noBeer.itens.find((i) => i.id === 'refrigerante')?.quantidade, 6);
+  assert.equal(noBeer.itens.find((i) => i.id === 'agua')?.quantidade, 3);
 });

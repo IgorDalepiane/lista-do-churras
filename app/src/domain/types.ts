@@ -31,6 +31,8 @@ export type ChurrascoInput = {
   acompanhamentoIds: SideId[];
   bebidaAlcoolica: boolean;
   quantosBebem: number;
+  incluirRefrigerante: boolean;
+  incluirAgua: boolean;
 };
 
 export type ListaItem = {
