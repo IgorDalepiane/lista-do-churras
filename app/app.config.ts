@@ -26,6 +26,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: 'com.listadochurras.app',
+    backgroundColor: '#F3EEE6',
     adaptiveIcon: {
       backgroundColor: '#F3EEE6',
       backgroundImage: './assets/android-icon-background.png',
@@ -43,12 +44,13 @@ const config: ExpoConfig = {
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#F3EEE6',
         image: './assets/splash-icon.png',
         imageWidth: 200,
+        resizeMode: 'contain',
+        backgroundColor: '#F3EEE6',
         dark: {
-          backgroundColor: '#F3EEE6',
-          image: './assets/splash-icon.png',
+          image: './assets/splash-icon-dark.png',
+          backgroundColor: '#3E372F',
         },
       },
     ],
