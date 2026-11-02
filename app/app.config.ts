@@ -54,6 +54,7 @@ const config: ExpoConfig = {
         },
       },
     ],
+    'expo-font',
     'expo-secure-store',
     [
       'expo-build-properties',
