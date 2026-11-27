@@ -1,4 +1,3 @@
-// Process lifetime: a cold start (or an OTA reload) starts over at INITIAL_LIST_AD_MEMORY.
 export type ListAdMemory = {
   readonly listRequests: number;
   readonly adShown: boolean;

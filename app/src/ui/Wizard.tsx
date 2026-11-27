@@ -123,7 +123,7 @@ export function Wizard() {
         return { ...w, step: s[Math.min(s.indexOf(w.step) + 1, s.length - 1)] };
       });
     };
-    if (steps[stepIndex + 1] === 'lista') beforeList(monetization.adsRemoved, advance);
+    if (steps[stepIndex + 1] === 'lista') void beforeList(monetization.adsRemoved).then(advance);
     else advance();
   }
 

@@ -3,7 +3,6 @@ import { AdsConsent } from 'react-native-google-mobile-ads';
 let pending: Promise<boolean> | null = null;
 let lastAnswer = false;
 
-// One UMP flow per process, shared by the banner and the interstitial so they never disagree.
 export function ensureConsent(): Promise<boolean> {
   pending ??= gather();
   return pending;
