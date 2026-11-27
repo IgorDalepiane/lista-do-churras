@@ -59,10 +59,11 @@ export const split = {
 };
 
 export const listaCopy = {
-  heroKicker: 'Para levar',
-  ofMeat: 'de carne',
+  heroKicker: 'Seu churrasco precisa de',
+  ofMeat: 'de carne no total',
   meta: (n: number, h: number) =>
     `${n} ${n === 1 ? 'pessoa' : 'pessoas'} · ${h} h de fogo`,
+  buy: 'Comprar',
   privacy: 'Privacidade',
 };
 

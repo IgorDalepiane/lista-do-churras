@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { ListaItem } from '../domain/types';
 import { formatQty } from '../domain/format';
+import { listaCopy } from './copy';
 import { ItemIcon } from './icons';
 import { C } from './theme';
 
@@ -11,9 +12,11 @@ export function ListaRow({ item }: { item: ListaItem }) {
         <View style={styles.iconWrap}>
           <ItemIcon id={item.id} size={22} />
         </View>
-        <Text style={styles.name}>{item.nome}</Text>
-        <View style={styles.qtyPill}>
-          <Text style={styles.qtyPillTxt}>{formatQty(item.quantidade, item.unidade)}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.name}>{item.nome}</Text>
+          <Text style={styles.buy}>
+            {listaCopy.buy} <Text style={styles.qty}>{formatQty(item.quantidade, item.unidade)}</Text>
+          </Text>
         </View>
       </View>
     </View>
@@ -36,12 +39,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  name: { flex: 1, color: C.ink, fontWeight: '800', fontSize: 16 },
-  qtyPill: {
-    backgroundColor: C.accentSoft,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  qtyPillTxt: { color: C.accent, fontWeight: '800', fontSize: 12 },
+  name: { color: C.ink, fontWeight: '800', fontSize: 16 },
+  buy: { color: C.muted, fontSize: 15, marginTop: 2 },
+  qty: { color: C.ink, fontWeight: '800' },
 });
