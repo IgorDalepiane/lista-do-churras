@@ -176,12 +176,10 @@ export function SelectCard({
 
 export function Radio({
   label,
-  hint,
   on,
   onPress,
 }: {
   label: string;
-  hint?: string;
   on: boolean;
   onPress: () => void;
 }) {
@@ -199,22 +197,17 @@ export function Radio({
           <Animated.View entering={reduce ? undefined : enterAppear} style={styles.dotCore} />
         ) : null}
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.radioTxt}>{label}</Text>
-        {hint ? <Text style={styles.radioHint}>{hint}</Text> : null}
-      </View>
+      <Text style={styles.radioTxt}>{label}</Text>
     </PressScale>
   );
 }
 
 export function Checkbox({
   label,
-  hint,
   on,
   onPress,
 }: {
   label: string;
-  hint?: string;
   on: boolean;
   onPress: () => void;
 }) {
@@ -226,6 +219,7 @@ export function Checkbox({
       style={[styles.radio, on && styles.radioOn]}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: on }}
+      accessibilityLabel={label}
     >
       <View style={[styles.box, on && styles.boxOn]}>
         {on ? (
@@ -234,10 +228,7 @@ export function Checkbox({
           </Animated.Text>
         ) : null}
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.radioTxt}>{label}</Text>
-        {hint ? <Text style={styles.radioHint}>{hint}</Text> : null}
-      </View>
+      <Text style={styles.radioTxt}>{label}</Text>
     </PressScale>
   );
 }
@@ -380,8 +371,7 @@ export const styles = StyleSheet.create({
   },
   boxOn: { borderColor: C.accent, backgroundColor: C.accent },
   boxCheck: { color: C.card, fontSize: 14, fontWeight: '800' },
-  radioTxt: { color: C.navy, fontSize: 16, fontWeight: '700' },
-  radioHint: { color: C.muted, fontSize: 13, marginTop: 2 },
+  radioTxt: { flex: 1, color: C.navy, fontSize: 16, fontWeight: '700' },
   seg: {
     flexDirection: 'row',
     backgroundColor: C.bg,
