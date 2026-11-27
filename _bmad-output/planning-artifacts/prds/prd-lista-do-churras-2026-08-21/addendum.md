@@ -27,6 +27,14 @@ Como (não o quê). Downstream: arquitetura, UX, épicos.
 - **Refrigerante:** opcional, **ligado por padrão**. Base 4 h: `0,6 L × quem não bebe`. Quem bebe cerveja não entra. × `durationMul`. Quantidade 0 some da lista.
 - **Água:** opcional, **desligada por padrão**. Se ligada: `0,3 L × pessoas` × `durationMul` (reserva, não hidratação por bebedor).
 
+## Override 2026-11-27 (feedback de teste)
+
+- **Preço Informado e Total estimado saem do app.** A Lista mostra só quantidade. O Total era a ponte para o rateio Pix, que saiu do V1. FR-11 e a parte de preço de FR-12, FR-13, NFR-1 e NFR-3 ficam sem efeito. Se o rateio voltar, o valor a dividir é decisão dele.
+- **Acompanhamentos:** entram pão de alho e queijo coalho. `[ASSUMPTION]` 1 un por pessoa cada.
+- **Anúncio:** além do banner na Lista, um intersticial na transição para a Lista. Só a partir da segunda vez que a Lista abre na sessão, no máximo um por sessão, nunca na primeira Lista. FR-13 continua: anúncio não cobre kg.
+- **Progresso:** respostas e passo ficam salvos no aparelho e voltam depois que o sistema fecha o app. "Começar de novo" apaga. Só entradas são salvas, o cálculo continua derivado (FR-10).
+- **Textos:** títulos no imperativo e sem subtítulo nos passos. Só a divisão dos cortes mostra o total de kg embaixo do título.
+
 ## Faixas de partida (frágeis — `[ASSUMPTION]`)
 
 Sem dados de churrasco real. V1 publica a faixa; o Anfitrião puxa Percentual / Nível de Fome.
