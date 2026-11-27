@@ -3,8 +3,7 @@ import { INITIAL_WIZARD, parseSavedWizard, serializeWizard, type WizardState } f
 
 const KEY = 'wizard_progress';
 
-// Synchronous so the first frame is already the restored wizard and no async restore can
-// overwrite a tap. getItem throws on web and on keystore errors; both mean "no save".
+// getItem throws on web and on keystore errors; both mean "no save".
 export function loadProgress(): WizardState {
   try {
     return parseSavedWizard(SecureStore.getItem(KEY));
@@ -13,23 +12,6 @@ export function loadProgress(): WizardState {
   }
 }
 
-let queued: string | null = null;
-let writing = false;
-
-// One write in flight and the newest snapshot queued, because concurrent setItemAsync calls
-// do not promise to land in call order.
 export function saveProgress(state: WizardState): void {
-  queued = serializeWizard(state);
-  if (writing) return;
-  writing = true;
-  void (async () => {
-    while (queued !== null) {
-      const value = queued;
-      queued = null;
-      try {
-        await SecureStore.setItemAsync(KEY, value);
-      } catch {}
-    }
-    writing = false;
-  })();
+  SecureStore.setItemAsync(KEY, serializeWizard(state)).catch(() => {});
 }

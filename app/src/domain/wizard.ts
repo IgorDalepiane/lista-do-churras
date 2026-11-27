@@ -29,7 +29,6 @@ export type WizardAnswers = Omit<ChurrascoInput, 'bebidaAlcoolica'> & {
   bebidaAlcoolica: boolean | null;
 };
 
-// `step` is a StepId, never an index: the step list has 7, 8 or 9 entries depending on the answers.
 export type WizardState = {
   readonly answers: WizardAnswers;
   readonly step: StepId;
@@ -97,7 +96,6 @@ export function reconcile(a: WizardAnswers): WizardAnswers {
   };
 }
 
-// Bump when an existing field changes meaning. Adding or removing a field needs no bump.
 const SAVE_VERSION = 1;
 
 type SavedWizardV1 = { v: 1; step: string; answers: Record<string, unknown> };
@@ -127,7 +125,6 @@ const CUT_IDS: ReadonlySet<CutId> = new Set(CUTS.map((c) => c.id));
 const SIDE_IDS: ReadonlySet<SideId> = new Set(SIDES.map((s) => s.id));
 const HUNGERS: ReadonlySet<Hunger> = new Set(['pouco', 'medio', 'muito']);
 
-// The mapped type fails the build when WizardAnswers gains a field without a parser.
 const FIELD_PARSERS: { [K in keyof WizardAnswers]: (raw: unknown) => WizardAnswers[K] | undefined } = {
   homens: (v) => intIn(v, 0, 999),
   mulheres: (v) => intIn(v, 0, 999),
@@ -177,19 +174,17 @@ function percentMap(v: unknown): Record<string, number> | undefined {
   return valid ? (v as Record<string, number>) : undefined;
 }
 
-// Opens on the saved step or the nearest earlier one that still exists, and never past a gate
-// the restored answers fail.
 function resolveStep(answers: WizardAnswers, saved: string | null): StepId {
   const steps = stepsFor(answers);
+  const target = lastStepUpTo(steps, saved);
+  return firstBlockedBefore(steps, target, answers) ?? target;
+}
+
+function lastStepUpTo(steps: StepId[], saved: string | null): StepId {
   const savedPos = STEP_ORDER.indexOf(saved as StepId);
-  let target = 0;
-  if (savedPos >= 0) {
-    steps.forEach((s, i) => {
-      if (STEP_ORDER.indexOf(s) <= savedPos) target = i;
-    });
-  }
-  for (let i = 0; i < target; i++) {
-    if (!canAdvance(steps[i], answers)) return steps[i];
-  }
-  return steps[target];
+  return [...steps].reverse().find((s) => STEP_ORDER.indexOf(s) <= savedPos) ?? steps[0];
+}
+
+function firstBlockedBefore(steps: StepId[], target: StepId, answers: WizardAnswers): StepId | undefined {
+  return steps.slice(0, steps.indexOf(target)).find((s) => !canAdvance(s, answers));
 }
