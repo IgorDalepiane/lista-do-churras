@@ -76,10 +76,11 @@ export const listaCopy = {
 };
 
 export const adsCopy = {
-  kicker: 'Compra única',
-  title: 'Leva o app',
-  body: 'Lista do Churras sem anúncio, na conta da loja. Vale em qualquer aparelho com essa mesma conta. O cálculo continua o mesmo.',
-  buy: (price: string) => `Comprar · ${price}`,
+  kicker: 'Pague uma vez',
+  title: 'Churrasco sem anúncio',
+  priceNote: 'uma vez só, sem mensalidade',
+  body: 'Os anúncios somem de vez. Vale em todo aparelho com a mesma conta da loja.',
+  buy: 'Remover anúncios',
   restore: 'Restaurar compra',
   defaultPrice: 'R$ 9,90',
 };
@@ -99,7 +100,7 @@ export const privacy = {
     },
     {
       heading: 'Anúncios',
-      body: 'Na versão grátis, o Google AdMob pode mostrar um anúncio na tela da lista e, de vez em quando, um anúncio de tela cheia antes de abrir a lista. Nenhum anúncio cobre os kg. Abaixo da lista tem um convite para levar Lista do Churras sem anúncio. O Google pode tratar dados do anúncio conforme a política dele. O formulário de consentimento ou o pedido do sistema aparece quando a lei ou o sistema pede.',
+      body: 'Na versão grátis, o Google AdMob pode mostrar um anúncio na tela da lista e, de vez em quando, um anúncio de tela cheia antes de abrir a lista. Nenhum anúncio cobre os kg. Abaixo da lista tem um convite para remover os anúncios. O Google pode tratar dados do anúncio conforme a política dele. O formulário de consentimento ou o pedido do sistema aparece quando a lei ou o sistema pede.',
     },
     {
       heading: 'Compra na loja',
