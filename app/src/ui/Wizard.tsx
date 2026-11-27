@@ -20,6 +20,7 @@ import { formatQty, groupItens, listaTexto, SECAO_LABEL } from '../domain/format
 import type { CutId, Hunger, SideId } from '../domain/types';
 import { canAdvance, INITIAL_WIZARD, reconcile, stepsFor, toChurrascoInput, type WizardAnswers } from '../domain/wizard';
 import { AdSlot } from '../monetization/AdSlot';
+import { beforeList } from '../monetization/interstitial';
 import { useMonetization } from '../monetization/MonetizationProvider';
 import { beer, cta, hours, listaCopy, people as peopleCopy, restartCopy, split, STEP_NAME, titles } from './copy';
 import { ItemIcon, PeopleIcon } from './icons';
@@ -115,11 +116,15 @@ export function Wizard() {
 
   function next() {
     if (!canContinue()) return;
-    setDirection('forward');
-    setWizard((w) => {
-      const s = stepsFor(w.answers);
-      return { ...w, step: s[Math.min(s.indexOf(w.step) + 1, s.length - 1)] };
-    });
+    const advance = () => {
+      setDirection('forward');
+      setWizard((w) => {
+        const s = stepsFor(w.answers);
+        return { ...w, step: s[Math.min(s.indexOf(w.step) + 1, s.length - 1)] };
+      });
+    };
+    if (steps[stepIndex + 1] === 'lista') beforeList(monetization.adsRemoved, advance);
+    else advance();
   }
 
   function restart() {

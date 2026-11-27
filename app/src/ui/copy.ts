@@ -99,7 +99,7 @@ export const privacy = {
     },
     {
       heading: 'Anúncios',
-      body: 'Na versão grátis, o Google AdMob pode mostrar um anúncio na tela da lista. O anúncio não cobre os kg. Abaixo da lista tem um convite para levar Lista do Churras sem anúncio. O Google pode tratar dados do anúncio conforme a política dele. O formulário de consentimento ou o pedido do sistema aparece quando a lei ou o sistema pede.',
+      body: 'Na versão grátis, o Google AdMob pode mostrar um anúncio na tela da lista e, de vez em quando, um anúncio de tela cheia antes de abrir a lista. Nenhum anúncio cobre os kg. Abaixo da lista tem um convite para levar Lista do Churras sem anúncio. O Google pode tratar dados do anúncio conforme a política dele. O formulário de consentimento ou o pedido do sistema aparece quando a lei ou o sistema pede.',
     },
     {
       heading: 'Compra na loja',
