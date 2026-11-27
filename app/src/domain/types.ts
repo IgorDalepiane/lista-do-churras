@@ -12,7 +12,15 @@ export type CutId =
   | 'frango'
   | 'coracao';
 
-export type SideId = 'farofa' | 'vinagrete' | 'pao' | 'gelo' | 'copo' | 'prato';
+export type SideId =
+  | 'farofa'
+  | 'vinagrete'
+  | 'pao'
+  | 'pao_de_alho'
+  | 'queijo_coalho'
+  | 'gelo'
+  | 'copo'
+  | 'prato';
 
 export type Unit = 'kg' | 'L' | 'un';
 

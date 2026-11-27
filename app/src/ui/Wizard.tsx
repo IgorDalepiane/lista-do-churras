@@ -14,12 +14,12 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { calcularLista, equalPercents, rebalancePercents } from '../domain/calculate';
-import { CUTS, HUNGER_LABEL, SIDE_DISPOSABLE, SIDE_FOOD, SIDES } from '../domain/catalog';
+import { CUTS, HUNGER_LABEL, SIDES } from '../domain/catalog';
 import { formatQty, groupItens, listaTexto, SECAO_LABEL } from '../domain/format';
 import type { CutId, Hunger, SideId } from '../domain/types';
 import { AdSlot } from '../monetization/AdSlot';
 import { useMonetization } from '../monetization/MonetizationProvider';
-import { beer, cta, hours, listaCopy, mesaGroups, people as peopleCopy, split, STEP_NAME, titles } from './copy';
+import { beer, cta, hours, listaCopy, people as peopleCopy, split, STEP_NAME, titles } from './copy';
 import { ItemIcon, PeopleIcon } from './icons';
 import { Counter, CtaPressable, Grid, GroupLabel, PressScale, Radio, Screen, Segmented, SelectCard } from './kit';
 import { ListaRow } from './ListaRow';
@@ -257,28 +257,13 @@ export function Wizard() {
 
             {step === 'acompanhamentos' && (
               <Screen title={titles.acompanhamentos}>
-                <GroupLabel>{mesaGroups.food}</GroupLabel>
                 <Grid>
-                  {SIDES.filter((s) => SIDE_FOOD.includes(s.id)).map((s, i) => (
+                  {SIDES.map((s, i) => (
                     <SelectCard
                       key={s.id}
                       icon={<ItemIcon id={s.id} />}
                       label={s.nome}
                       tint={TILE[i % TILE.length]}
-                      on={acompanhamentoIds.includes(s.id)}
-                      onPress={() => toggleSide(s.id)}
-                    />
-                  ))}
-                </Grid>
-                <View style={{ height: 12 }} />
-                <GroupLabel>{mesaGroups.disposable}</GroupLabel>
-                <Grid>
-                  {SIDES.filter((s) => SIDE_DISPOSABLE.includes(s.id)).map((s, i) => (
-                    <SelectCard
-                      key={s.id}
-                      icon={<ItemIcon id={s.id} />}
-                      label={s.nome}
-                      tint={TILE[(i + 2) % TILE.length]}
                       on={acompanhamentoIds.includes(s.id)}
                       onPress={() => toggleSide(s.id)}
                     />

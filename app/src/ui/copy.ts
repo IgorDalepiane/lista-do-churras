@@ -32,11 +32,6 @@ export const cta = {
   copied: 'Copiado',
 };
 
-export const mesaGroups = {
-  food: 'Para comer',
-  disposable: 'Descartáveis',
-};
-
 export const people = {
   homens: 'Homens',
   mulheres: 'Mulheres',

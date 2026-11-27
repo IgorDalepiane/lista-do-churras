@@ -17,13 +17,12 @@ export const SIDES: { id: SideId; nome: string }[] = [
   { id: 'farofa', nome: 'Farofa' },
   { id: 'vinagrete', nome: 'Vinagrete' },
   { id: 'pao', nome: 'Pão' },
+  { id: 'pao_de_alho', nome: 'Pão de alho' },
+  { id: 'queijo_coalho', nome: 'Queijo coalho' },
   { id: 'gelo', nome: 'Gelo' },
   { id: 'copo', nome: 'Copo' },
   { id: 'prato', nome: 'Prato' },
 ];
-
-export const SIDE_FOOD: SideId[] = ['farofa', 'vinagrete', 'pao', 'gelo'];
-export const SIDE_DISPOSABLE: SideId[] = ['copo', 'prato'];
 
 export const HUNGER_LABEL: Record<Hunger, string> = {
   pouco: 'Pouco',

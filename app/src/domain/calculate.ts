@@ -100,6 +100,8 @@ function sideQty(id: SideId, people: number): { quantidade: number; unidade: Lis
     case 'vinagrete':
       return { quantidade: roundKg(0.04 * people), unidade: 'kg' };
     case 'pao':
+    case 'pao_de_alho':
+    case 'queijo_coalho':
       return { quantidade: people, unidade: 'un' };
     case 'gelo':
       return { quantidade: roundKg(0.5 * people), unidade: 'kg' };
