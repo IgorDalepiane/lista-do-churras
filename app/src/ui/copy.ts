@@ -40,7 +40,7 @@ export const sub = {
   horas: 'Quanto mais tempo, mais carne.',
   bebida: 'Se sim, na próxima pergunta a gente pergunta quantos bebem.',
   partilha: 'Como divide o kg entre os cortes.',
-  lista: 'O que comprar. Preço é opcional.',
+  lista: 'O que comprar.',
 };
 
 export function bebemSub(people: number): string {
@@ -96,10 +96,6 @@ export const listaCopy = {
   ofMeat: 'de carne',
   meta: (n: number, h: number) =>
     `${n} ${n === 1 ? 'pessoa' : 'pessoas'} · ${h} h de fogo`,
-  pricedOf: (n: number, total: number) => `${n} de ${total} com preço`,
-  total: (money: string) => `Total estimado ${money}`,
-  totalHint: 'Ideia de quanto vai dar, não a conta de cada um.',
-  noPrices: 'Sem preço a lista ainda serve: é o que comprar.',
   privacy: 'Privacidade',
 };
 
@@ -119,11 +115,11 @@ export const privacy = {
   sections: [
     {
       heading: 'O que fica no aparelho',
-      body: 'Gente, cortes, quantidades e os preços que você cola. Esses números não são enviados para a gente. O app funciona sem internet depois de instalado, salvo anúncios, compra na loja e uma checagem de atualização do código quando o aparelho está online.',
+      body: 'Gente, cortes e quantidades. Essas respostas não são enviadas para a gente. O app funciona sem internet depois de instalado, salvo anúncios, compra na loja e uma checagem de atualização do código quando o aparelho está online.',
     },
     {
       heading: 'Atualizações do app',
-      body: 'Se o aparelho estiver online, o app pode perguntar à Expo se existe uma correção de código para baixar, sem passar pela loja. Esse pedido não leva a lista nem os preços. Sem internet o cálculo usa o que já está no aparelho.',
+      body: 'Se o aparelho estiver online, o app pode perguntar à Expo se existe uma correção de código para baixar, sem passar pela loja. Esse pedido não leva a lista. Sem internet o cálculo usa o que já está no aparelho.',
     },
     {
       heading: 'Anúncios',
@@ -135,7 +131,7 @@ export const privacy = {
     },
     {
       heading: 'O que a gente não faz',
-      body: 'Não criamos conta. Não enviamos seus preços de açougue. Não tem Pix neste app. Não vendemos lista de convidados.',
+      body: 'Não criamos conta. Não enviamos suas respostas. Não tem Pix neste app. Não vendemos lista de convidados.',
     },
   ],
 };

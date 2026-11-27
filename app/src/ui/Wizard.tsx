@@ -15,15 +15,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { calcularLista, equalPercents, rebalancePercents } from '../domain/calculate';
 import { CUTS, HUNGER_LABEL, SIDE_DISPOSABLE, SIDE_FOOD, SIDES } from '../domain/catalog';
-import {
-  formatMoney,
-  formatQty,
-  groupItens,
-  listaTexto,
-  parseBrNumber,
-  SECAO_LABEL,
-  totalEstimado,
-} from '../domain/format';
+import { formatQty, groupItens, listaTexto, SECAO_LABEL } from '../domain/format';
 import type { CutId, Hunger, SideId } from '../domain/types';
 import { AdSlot } from '../monetization/AdSlot';
 import { useMonetization } from '../monetization/MonetizationProvider';
@@ -86,7 +78,6 @@ export function Wizard() {
   const [quantosBebem, setQuantosBebem] = useState(0);
   const [incluirRefrigerante, setIncluirRefrigerante] = useState(true);
   const [incluirAgua, setIncluirAgua] = useState(false);
-  const [precos, setPrecos] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -147,9 +138,6 @@ export function Wizard() {
       peopleCount,
     ],
   );
-
-  const total = totalEstimado(lista, precos);
-  const pricedCount = lista.ok ? lista.itens.filter((i) => parseBrNumber(precos[i.id] ?? '') != null).length : 0;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
@@ -218,7 +206,7 @@ export function Wizard() {
   }, [back, showPrivacy, stepIndex]);
 
   async function copyLista() {
-    await Clipboard.setStringAsync(listaTexto(lista, precos));
+    await Clipboard.setStringAsync(listaTexto(lista));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -472,25 +460,10 @@ export function Wizard() {
                       <View key={g.secao} style={styles.section}>
                         <Text style={styles.sectionTitle}>{SECAO_LABEL[g.secao]}</Text>
                         {g.itens.map((item) => (
-                          <ListaRow
-                            key={item.id}
-                            item={item}
-                            value={precos[item.id] ?? ''}
-                            onChange={(t) => setPrecos((p) => ({ ...p, [item.id]: t }))}
-                          />
+                          <ListaRow key={item.id} item={item} />
                         ))}
                       </View>
                     ))}
-
-                    {total > 0 ? (
-                      <Animated.View entering={reduceMotion ? undefined : enterAppear} style={styles.totalCard}>
-                        <Text style={styles.totalKicker}>{listaCopy.pricedOf(pricedCount, lista.itens.length)}</Text>
-                        <Text style={styles.total}>{listaCopy.total(formatMoney(total))}</Text>
-                        <Text style={styles.totalHint}>{listaCopy.totalHint}</Text>
-                      </Animated.View>
-                    ) : (
-                      <Text style={styles.microLeft}>{listaCopy.noPrices}</Text>
-                    )}
                   </>
                 )}
                 {!copySticky ? (
@@ -668,7 +641,6 @@ const styles = StyleSheet.create({
   presetTag: { color: C.muted, fontSize: 11, marginTop: 2, fontWeight: '600' },
   presetOnTxt: { color: C.card },
   micro: { color: C.muted, marginBottom: 12, textAlign: 'center' },
-  microLeft: { color: C.muted, marginTop: 8, lineHeight: 20 },
   preview: {
     marginTop: 24,
     backgroundColor: C.accentSoft,
@@ -729,15 +701,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 8,
   },
-  totalCard: {
-    backgroundColor: C.accentSoft,
-    borderRadius: 20,
-    padding: 16,
-    marginTop: 8,
-  },
-  totalKicker: { color: C.accent, fontWeight: '700', fontSize: 12 },
-  total: { color: C.ink, fontSize: 22, fontWeight: '800', marginTop: 4 },
-  totalHint: { color: C.muted, marginTop: 6, fontSize: 13, lineHeight: 18 },
   warn: { color: C.accent, fontSize: 16 },
   footer: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
   listaCopy: { marginTop: 28 },

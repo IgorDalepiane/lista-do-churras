@@ -1,32 +1,10 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { StyleSheet, Text, View } from 'react-native';
 import type { ListaItem } from '../domain/types';
-import {
-  formatMoney,
-  formatQty,
-  formatUnitPrice,
-  parseBrNumber,
-  unitPriceHint,
-  unitPriceLabel,
-} from '../domain/format';
+import { formatQty } from '../domain/format';
 import { ItemIcon } from './icons';
-import { enterAppear, useReduceMotion } from './motion';
 import { C } from './theme';
 
-export function ListaRow({
-  item,
-  value,
-  onChange,
-}: {
-  item: ListaItem;
-  value: string;
-  onChange: (t: string) => void;
-}) {
-  const reduce = useReduceMotion();
-  const preco = parseBrNumber(value);
-  const linha = preco != null ? item.quantidade * preco : null;
-  const unitLabel = unitPriceLabel(item.unidade);
-
+export function ListaRow({ item }: { item: ListaItem }) {
   return (
     <View style={styles.card}>
       <View style={styles.head}>
@@ -38,27 +16,6 @@ export function ListaRow({
           <Text style={styles.qtyPillTxt}>{formatQty(item.quantidade, item.unidade)}</Text>
         </View>
       </View>
-      <Text style={styles.hint}>Preço {unitPriceHint(item)}</Text>
-      <View style={styles.field}>
-        <TextInput
-          style={styles.input}
-          placeholder="0,00"
-          placeholderTextColor={C.muted}
-          keyboardType="decimal-pad"
-          value={value}
-          onChangeText={onChange}
-          accessibilityLabel={`${item.nome}, ${unitLabel}`}
-        />
-        <View style={styles.unitChip}>
-          <Text style={styles.unitChipTxt}>{unitLabel}</Text>
-        </View>
-      </View>
-      {linha != null && preco != null ? (
-        <Animated.Text entering={reduce ? undefined : enterAppear} style={styles.lineTotal}>
-          {formatQty(item.quantidade, item.unidade)} × {formatUnitPrice(preco, item.unidade)} ={' '}
-          {formatMoney(linha)}
-        </Animated.Text>
-      ) : null}
     </View>
   );
 }
@@ -87,32 +44,4 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   qtyPillTxt: { color: C.accent, fontWeight: '800', fontSize: 12 },
-  hint: { color: C.muted, fontSize: 13, marginTop: 10, marginBottom: 8 },
-  field: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: C.bg,
-    borderRadius: 14,
-    paddingLeft: 12,
-    borderWidth: 1,
-    borderColor: C.line,
-  },
-  input: {
-    flex: 1,
-    height: 48,
-    color: C.ink,
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  unitChip: {
-    backgroundColor: C.ink,
-    height: 48,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderTopRightRadius: 13,
-    borderBottomRightRadius: 13,
-  },
-  unitChipTxt: { color: C.card, fontWeight: '800', fontSize: 14 },
-  lineTotal: { color: C.ok, fontWeight: '700', marginTop: 8, fontSize: 13 },
 });
