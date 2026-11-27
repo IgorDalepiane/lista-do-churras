@@ -30,6 +30,14 @@ export const cta = {
   seeLista: 'Ver a lista',
   copy: 'Copiar lista',
   copied: 'Copiado',
+  startOver: 'Começar de novo',
+};
+
+export const restartCopy = {
+  title: 'Começar de novo?',
+  body: 'As respostas deste churrasco serão apagadas.',
+  cancel: 'Cancelar',
+  confirm: 'Começar de novo',
 };
 
 export const people = {
@@ -83,7 +91,7 @@ export const privacy = {
   sections: [
     {
       heading: 'O que fica no aparelho',
-      body: 'Gente, cortes e quantidades. Essas respostas não são enviadas para a gente. O app funciona sem internet depois de instalado, salvo anúncios, compra na loja e uma checagem de atualização do código quando o aparelho está online.',
+      body: 'Gente, cortes e quantidades. Essas respostas ficam salvas no aparelho, para a lista voltar se o app fechar, e não são enviadas para a gente. O app funciona sem internet depois de instalado, salvo anúncios, compra na loja e uma checagem de atualização do código quando o aparelho está online.',
     },
     {
       heading: 'Atualizações do app',
