@@ -21,7 +21,18 @@ import { AdSlot } from '../monetization/AdSlot';
 import { useMonetization } from '../monetization/MonetizationProvider';
 import { beer, cta, hours, listaCopy, people as peopleCopy, split, STEP_NAME, titles } from './copy';
 import { ItemIcon, PeopleIcon } from './icons';
-import { Counter, CtaPressable, Grid, GroupLabel, PressScale, Radio, Screen, Segmented, SelectCard } from './kit';
+import {
+  Checkbox,
+  Counter,
+  CtaPressable,
+  Grid,
+  GroupLabel,
+  PressScale,
+  Radio,
+  Screen,
+  Segmented,
+  SelectCard,
+} from './kit';
 import { ListaRow } from './ListaRow';
 import {
   easeOut,
@@ -339,8 +350,8 @@ export function Wizard() {
                 />
                 <View style={{ height: 12 }} />
                 <GroupLabel>{beer.extra}</GroupLabel>
-                <Radio label={beer.soda} on={incluirRefrigerante} onPress={() => setIncluirRefrigerante((v) => !v)} />
-                <Radio label={beer.water} on={incluirAgua} onPress={() => setIncluirAgua((v) => !v)} />
+                <Checkbox label={beer.soda} on={incluirRefrigerante} onPress={() => setIncluirRefrigerante((v) => !v)} />
+                <Checkbox label={beer.water} on={incluirAgua} onPress={() => setIncluirAgua((v) => !v)} />
               </Screen>
             )}
 

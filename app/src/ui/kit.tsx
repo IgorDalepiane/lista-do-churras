@@ -187,10 +187,51 @@ export function Radio({
 }) {
   const reduce = useReduceMotion();
   return (
-    <PressScale haptic="selection" onPress={onPress} style={[styles.radio, on && styles.radioOn]}>
+    <PressScale
+      haptic="selection"
+      onPress={onPress}
+      style={[styles.radio, on && styles.radioOn]}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: on }}
+    >
       <View style={[styles.dot, on && styles.dotOn]}>
         {on ? (
           <Animated.View entering={reduce ? undefined : enterAppear} style={styles.dotCore} />
+        ) : null}
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.radioTxt}>{label}</Text>
+        {hint ? <Text style={styles.radioHint}>{hint}</Text> : null}
+      </View>
+    </PressScale>
+  );
+}
+
+export function Checkbox({
+  label,
+  hint,
+  on,
+  onPress,
+}: {
+  label: string;
+  hint?: string;
+  on: boolean;
+  onPress: () => void;
+}) {
+  const reduce = useReduceMotion();
+  return (
+    <PressScale
+      haptic="selection"
+      onPress={onPress}
+      style={[styles.radio, on && styles.radioOn]}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: on }}
+    >
+      <View style={[styles.box, on && styles.boxOn]}>
+        {on ? (
+          <Animated.Text entering={reduce ? undefined : enterCheck} style={styles.boxCheck}>
+            ✓
+          </Animated.Text>
         ) : null}
       </View>
       <View style={{ flex: 1 }}>
@@ -328,6 +369,17 @@ export const styles = StyleSheet.create({
   },
   dotOn: { borderColor: C.accent },
   dotCore: { width: 12, height: 12, borderRadius: 6, backgroundColor: C.accent },
+  box: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: C.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boxOn: { borderColor: C.accent, backgroundColor: C.accent },
+  boxCheck: { color: C.card, fontSize: 14, fontWeight: '800' },
   radioTxt: { color: C.navy, fontSize: 16, fontWeight: '700' },
   radioHint: { color: C.muted, fontSize: 13, marginTop: 2 },
   seg: {
