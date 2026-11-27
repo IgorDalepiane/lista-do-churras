@@ -1,4 +1,4 @@
-import type { StepId } from './steps';
+import type { StepId } from '../domain/wizard';
 
 export const STEP_NAME: Record<StepId, string> = {
   cortes: 'Grelha',

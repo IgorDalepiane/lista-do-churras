@@ -44,7 +44,7 @@ import {
   useReduceMotion,
 } from './motion';
 import { PrivacyPolicy } from './PrivacyPolicy';
-import type { StepId } from './steps';
+import type { StepId } from '../domain/wizard';
 import { C, TILE } from './theme';
 
 const HUNGER_OPTS = (['pouco', 'medio', 'muito'] as Hunger[]).map((id) => ({
