@@ -100,6 +100,8 @@ function sideQty(id: SideId, people: number): { quantidade: number; unidade: Lis
     case 'vinagrete':
       return { quantidade: roundKg(0.04 * people), unidade: 'kg' };
     case 'pao':
+    case 'pao_de_alho':
+    case 'queijo_coalho':
       return { quantidade: people, unidade: 'un' };
     case 'gelo':
       return { quantidade: roundKg(0.5 * people), unidade: 'kg' };
@@ -112,11 +114,11 @@ function sideQty(id: SideId, people: number): { quantidade: number; unidade: Lis
 
 export function calcularLista(input: ChurrascoInput): Lista {
   const people = peopleTotal(input);
-  if (people <= 0) return { ok: false, motivo: 'Informa quanta gente vem.' };
-  if (input.horas <= 0) return { ok: false, motivo: 'Informa a duração em horas.' };
-  if (input.corteIds.length === 0) return { ok: false, motivo: 'Escolhe pelo menos um corte.' };
+  if (people <= 0) return { ok: false, motivo: 'Informe quanta gente vem.' };
+  if (input.horas <= 0) return { ok: false, motivo: 'Informe a duração em horas.' };
+  if (input.corteIds.length === 0) return { ok: false, motivo: 'Escolha pelo menos um corte.' };
   if (input.bebidaAlcoolica && (input.quantosBebem < 0 || Number.isNaN(input.quantosBebem))) {
-    return { ok: false, motivo: 'Se tem bebida alcoólica, informa quantos bebem.' };
+    return { ok: false, motivo: 'Se tem bebida alcoólica, informe quantos bebem.' };
   }
   if (input.bebidaAlcoolica && input.quantosBebem > people) {
     return { ok: false, motivo: 'Quantos bebem não pode passar do total de pessoas.' };

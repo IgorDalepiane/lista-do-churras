@@ -1,0 +1,13 @@
+Vai fazer churrasco e não sabe quanto comprar? O Lista do Churras calcula a carne, os acompanhamentos, o carvão e a bebida do seu churrasco.
+
+Responda algumas perguntas rápidas:
+• Quais cortes vão para a grelha
+• O que vai na mesa: farofa, vinagrete, pão, pão de alho, queijo coalho, gelo, copo e prato
+• Quantos homens, mulheres e crianças vêm
+• O tamanho da fome de cada grupo
+• Quantas horas o churrasco dura
+• Se vai ter cerveja, refrigerante e água
+
+No fim você recebe a lista de compras com a quantidade de cada item: os quilos de cada corte, o carvão, os litros de bebida e as unidades do que vai na mesa.
+
+Suas respostas ficam só no seu aparelho.

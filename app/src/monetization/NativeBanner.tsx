@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
-  AdsConsent,
   BannerAd,
   BannerAdSize,
   TestIds,
 } from 'react-native-google-mobile-ads';
 import { C } from '../ui/theme';
+import { ensureConsent } from './consent';
 import { LOAD_MS, PaywallCard, SLOT_MIN, type PayProps } from './Fallback';
 import { ADMOB_BANNER_UNIT_ID, ADS_USE_TEST_UNITS } from './runtime';
 
@@ -17,22 +17,16 @@ export function NativeBanner(props: PayProps) {
 
   useEffect(() => {
     let alive = true;
-    (async () => {
-      try {
-        const info = await AdsConsent.gatherConsent();
-        if (alive) setConsentOk(info.canRequestAds);
-        if (alive && !info.canRequestAds) setFailed(true);
-      } catch {
-        if (alive) setConsentOk(true);
-      }
-    })();
+    void ensureConsent().then((ok) => {
+      if (alive) setConsentOk(ok);
+    });
     return () => {
       alive = false;
     };
   }, []);
 
   useEffect(() => {
-    if (loaded || failed || consentOk === false) return;
+    if (loaded || failed || consentOk !== true) return;
     const t = setTimeout(() => {
       if (!loaded) setFailed(true);
     }, LOAD_MS);
@@ -43,7 +37,7 @@ export function NativeBanner(props: PayProps) {
     ADS_USE_TEST_UNITS || !ADMOB_BANNER_UNIT_ID
       ? TestIds.ADAPTIVE_BANNER
       : ADMOB_BANNER_UNIT_ID;
-  const showBanner = consentOk !== false && !failed;
+  const showBanner = consentOk === true && !failed;
 
   return (
     <View style={styles.wrap}>

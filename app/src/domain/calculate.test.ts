@@ -196,3 +196,16 @@ test('refrigerante só para quem não bebe; água é reserva por pessoa', () => 
   assert.equal(noBeer.itens.find((i) => i.id === 'refrigerante')?.quantidade, 6);
   assert.equal(noBeer.itens.find((i) => i.id === 'agua')?.quantidade, 3);
 });
+
+test('pão de alho e queijo coalho: uma unidade por pessoa', () => {
+  const lista = calcularLista(base({ acompanhamentoIds: ['pao_de_alho', 'queijo_coalho'] }));
+  assert.equal(lista.ok, true);
+  if (!lista.ok) return;
+  for (const id of ['pao_de_alho', 'queijo_coalho']) {
+    const item = lista.itens.find((i) => i.id === id);
+    assert.equal(item?.quantidade, 6);
+    assert.equal(item?.unidade, 'un');
+  }
+  assert.equal(lista.itens.find((i) => i.id === 'pao_de_alho')?.nome, 'Pão de alho');
+  assert.equal(lista.itens.find((i) => i.id === 'queijo_coalho')?.nome, 'Queijo coalho');
+});

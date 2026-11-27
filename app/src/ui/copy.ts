@@ -1,4 +1,4 @@
-import type { StepId } from './steps';
+import type { StepId } from '../domain/wizard';
 
 export const STEP_NAME: Record<StepId, string> = {
   cortes: 'Grelha',
@@ -8,45 +8,21 @@ export const STEP_NAME: Record<StepId, string> = {
   horas: 'Fogo',
   bebida: 'Cerveja',
   bebem: 'Quem bebe',
-  partilha: 'Partilha',
+  partilha: 'Divisão',
   lista: 'Lista',
 };
 
 export const titles: Record<StepId, string> = {
-  cortes: 'O que vai para a grelha?',
-  acompanhamentos: 'E na mesa?',
-  gente: 'Quem vem?',
-  fome: 'Como está a fome?',
-  horas: 'Quanto tempo de fogo?',
-  bebida: 'Vai ter cerveja?',
-  bebem: 'Quantos bebem?',
-  partilha: 'Como parte a carne?',
-  lista: 'Sua lista',
+  cortes: 'Escolha os cortes',
+  acompanhamentos: 'Escolha os acompanhamentos',
+  gente: 'Informe quantas pessoas vêm',
+  fome: 'Defina a fome dos convidados',
+  horas: 'Defina a duração do churrasco',
+  bebida: 'Informe se vai ter cerveja',
+  bebem: 'Informe quantos bebem cerveja',
+  partilha: 'Divida a carne entre os cortes',
+  lista: 'Confira sua lista de compras',
 };
-
-export function corteSub(count: number): string {
-  if (count === 0) return 'Escolhe os cortes. A quantidade aparece no fim.';
-  return `${count} corte${count > 1 ? 's' : ''}. A quantidade aparece no fim.`;
-}
-
-export function mesaSub(count: number): string {
-  if (count === 0) return 'O que mais entra na lista: comida e descartável. Pode pular.';
-  return `${count} ${count > 1 ? 'itens' : 'item'} fora da grelha.`;
-}
-
-export const sub = {
-  gente: 'Quantas pessoas vêm.',
-  fome: 'Um nível para cada grupo que vem.',
-  horas: 'Quanto mais tempo, mais carne.',
-  bebida: 'Se sim, na próxima pergunta a gente pergunta quantos bebem.',
-  partilha: 'Como divide o kg entre os cortes.',
-  lista: 'O que comprar. Preço é opcional.',
-};
-
-export function bebemSub(people: number): string {
-  const n = people === 1 ? '1 pessoa' : `${people} pessoas`;
-  return `Até ${n}.`;
-}
 
 export const cta = {
   continue: 'Continuar',
@@ -54,11 +30,14 @@ export const cta = {
   seeLista: 'Ver a lista',
   copy: 'Copiar lista',
   copied: 'Copiado',
+  startOver: 'Começar de novo',
 };
 
-export const mesaGroups = {
-  food: 'Para comer',
-  disposable: 'Descartáveis',
+export const restartCopy = {
+  title: 'Começar de novo?',
+  body: 'As respostas deste churrasco serão apagadas.',
+  cancel: 'Cancelar',
+  confirm: 'Começar de novo',
 };
 
 export const people = {
@@ -66,7 +45,6 @@ export const people = {
   mulheres: 'Mulheres',
   criancas: 'Crianças',
   live: (n: number) => `${n} ${n === 1 ? 'pessoa' : 'pessoas'}`,
-  adultsOnly: (n: number) => `Usar só os adultos (${n})`,
 };
 
 export const hours = {
@@ -77,37 +55,32 @@ export const hours = {
 
 export const beer = {
   yes: 'Sim, tem quem bebe',
-  yesHint: (n: number) => `${n} ${n === 1 ? 'pessoa' : 'pessoas'} no total`,
   no: 'Não, só o churrasco',
-  noHint: 'A lista fica sem litro de cerveja',
   extra: 'Também na lista',
   soda: 'Refrigerante',
-  sodaHint: 'Quem bebe cerveja não entra nessa conta.',
   water: 'Água',
-  waterHint: 'Muita gente não toma. Liga se for comprar garrafa.',
 };
 
 export const split = {
-  reset: 'Voltar ao recomendado (partilha igual)',
+  reset: 'Dividir por igual',
+  total: (kg: string) => `${kg} no total`,
 };
 
 export const listaCopy = {
-  heroKicker: 'Para levar',
-  ofMeat: 'de carne',
+  heroKicker: 'Seu churrasco precisa de',
+  ofMeat: 'de carne no total',
   meta: (n: number, h: number) =>
     `${n} ${n === 1 ? 'pessoa' : 'pessoas'} · ${h} h de fogo`,
-  pricedOf: (n: number, total: number) => `${n} de ${total} com preço`,
-  total: (money: string) => `Total estimado ${money}`,
-  totalHint: 'Ideia de quanto vai dar, não a conta de cada um.',
-  noPrices: 'Sem preço a lista ainda serve: é o que comprar.',
+  buy: 'Comprar',
   privacy: 'Privacidade',
 };
 
 export const adsCopy = {
-  kicker: 'Compra única',
-  title: 'Leva o app',
-  body: 'Lista do Churras sem anúncio, na conta da loja. Vale em qualquer aparelho com essa mesma conta. O cálculo continua o mesmo.',
-  buy: (price: string) => `Comprar · ${price}`,
+  kicker: 'Pague uma vez',
+  title: 'Churrasco sem anúncio',
+  priceNote: 'uma vez só, sem mensalidade',
+  body: 'Os anúncios somem de vez. Vale em todo aparelho com a mesma conta da loja.',
+  buy: 'Remover anúncios',
   restore: 'Restaurar compra',
   defaultPrice: 'R$ 9,90',
 };
@@ -119,15 +92,15 @@ export const privacy = {
   sections: [
     {
       heading: 'O que fica no aparelho',
-      body: 'Gente, cortes, quantidades e os preços que você cola. Esses números não são enviados para a gente. O app funciona sem internet depois de instalado, salvo anúncios, compra na loja e uma checagem de atualização do código quando o aparelho está online.',
+      body: 'Gente, cortes e quantidades. Essas respostas ficam salvas no aparelho, para a lista voltar se o app fechar, e não são enviadas para a gente. O app funciona sem internet depois de instalado, salvo anúncios, compra na loja e uma checagem de atualização do código quando o aparelho está online.',
     },
     {
       heading: 'Atualizações do app',
-      body: 'Se o aparelho estiver online, o app pode perguntar à Expo se existe uma correção de código para baixar, sem passar pela loja. Esse pedido não leva a lista nem os preços. Sem internet o cálculo usa o que já está no aparelho.',
+      body: 'Se o aparelho estiver online, o app pode perguntar à Expo se existe uma correção de código para baixar, sem passar pela loja. Esse pedido não leva a lista. Sem internet o cálculo usa o que já está no aparelho.',
     },
     {
       heading: 'Anúncios',
-      body: 'Na versão grátis, o Google AdMob pode mostrar um anúncio na tela da lista. O anúncio não cobre os kg. Abaixo da lista tem um convite para levar Lista do Churras sem anúncio. O Google pode tratar dados do anúncio conforme a política dele. O formulário de consentimento ou o pedido do sistema aparece quando a lei ou o sistema pede.',
+      body: 'Na versão grátis, o Google AdMob pode mostrar um anúncio na tela da lista e, de vez em quando, um anúncio de tela cheia antes de abrir a lista. Nenhum anúncio cobre os kg. Abaixo da lista tem um convite para remover os anúncios. O Google pode tratar dados do anúncio conforme a política dele. O formulário de consentimento ou o pedido do sistema aparece quando a lei ou o sistema pede.',
     },
     {
       heading: 'Compra na loja',
@@ -135,7 +108,7 @@ export const privacy = {
     },
     {
       heading: 'O que a gente não faz',
-      body: 'Não criamos conta. Não enviamos seus preços de açougue. Não tem Pix neste app. Não vendemos lista de convidados.',
+      body: 'Não criamos conta. Não enviamos suas respostas. Não tem Pix neste app. Não vendemos lista de convidados.',
     },
   ],
 };

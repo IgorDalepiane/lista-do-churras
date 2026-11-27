@@ -11,4 +11,6 @@ export const IAP_PRODUCT_ID = extraString('iapProductId') ?? 'lista_sem_anuncio'
 
 export const ADMOB_BANNER_UNIT_ID = extraString('admobBannerUnitId') ?? '';
 
-export const ADS_USE_TEST_UNITS = extra?.adsUseTestUnits !== false;
+export const ADMOB_INTERSTITIAL_UNIT_ID = extraString('admobInterstitialUnitId') ?? '';
+
+export const ADS_USE_TEST_UNITS = __DEV__ || extra?.adsUseTestUnits !== false;

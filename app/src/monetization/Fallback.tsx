@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { adsCopy, listaCopy } from '../ui/copy';
+import { PressScale } from '../ui/kit';
 import { C } from '../ui/theme';
 
 export const SLOT_MIN = 100;
@@ -19,16 +20,21 @@ export function PaywallCard({ priceLabel, busy, onRemoveAds, onRestore, onPrivac
     <View style={styles.card} accessibilityLabel={adsCopy.title}>
       <Text style={styles.kicker}>{adsCopy.kicker}</Text>
       <Text style={styles.title}>{adsCopy.title}</Text>
+      <View style={styles.priceRow}>
+        <Text style={styles.price}>{priceLabel}</Text>
+        <Text style={styles.priceNote}>{adsCopy.priceNote}</Text>
+      </View>
       <Text style={styles.body}>{adsCopy.body}</Text>
-      <Pressable
+      <PressScale
         onPress={onRemoveAds}
         disabled={busy}
+        haptic="selection"
         style={[styles.buy, busy && styles.buyOff]}
         accessibilityRole="button"
-        accessibilityLabel={adsCopy.buy(priceLabel)}
+        accessibilityLabel={`${adsCopy.buy}, ${priceLabel}`}
       >
-        <Text style={styles.buyTxt}>{adsCopy.buy(priceLabel)}</Text>
-      </Pressable>
+        <Text style={styles.buyTxt}>{adsCopy.buy}</Text>
+      </PressScale>
       <View style={styles.meta}>
         <Pressable
           onPress={onRestore}
@@ -66,10 +72,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   title: { color: C.ink, fontWeight: '800', fontSize: 22, marginTop: 8, letterSpacing: -0.4 },
+  priceRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', columnGap: 8, marginTop: 10 },
+  price: { color: C.ink, fontWeight: '800', fontSize: 28 },
+  priceNote: { color: C.muted, fontSize: 14 },
   body: { color: C.muted, marginTop: 8, lineHeight: 21, fontSize: 14 },
   buy: {
     marginTop: 16,
-    backgroundColor: C.ink,
+    backgroundColor: C.accent,
     borderRadius: 999,
     paddingVertical: 14,
     alignItems: 'center',
@@ -77,7 +86,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buyOff: { backgroundColor: C.ctaOff },
-  buyTxt: { color: C.card, fontWeight: '800', fontSize: 15 },
+  buyTxt: { color: C.card, fontWeight: '800', fontSize: 19 },
   meta: {
     marginTop: 6,
     flexDirection: 'row',

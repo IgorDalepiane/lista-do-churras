@@ -14,6 +14,8 @@ const ITEMS: Record<string, ImageSourcePropType> = {
   farofa: require('../../assets/items/farofa.png'),
   vinagrete: require('../../assets/items/vinagrete.png'),
   pao: require('../../assets/items/pao.png'),
+  pao_de_alho: require('../../assets/items/pao_de_alho.png'),
+  queijo_coalho: require('../../assets/items/queijo_coalho.png'),
   gelo: require('../../assets/items/gelo.png'),
   copo: require('../../assets/items/copo.png'),
   prato: require('../../assets/items/prato.png'),

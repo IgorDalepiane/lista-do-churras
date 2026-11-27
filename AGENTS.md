@@ -3,13 +3,13 @@
 
 ## lista-do-churras
 
-App Android PT-BR (React Native / Expo) para calcular carne, acompanhamentos e custo estimado de um churrasco. Código em `app/`. Planejamento BMad em `_bmad-output/`. Contrato de produto: `_bmad-output/forge/churrascometro-rateio-pix/forged-idea.md` + PRD em `_bmad-output/planning-artifacts/prds/prd-lista-do-churras-2026-08-21/`.
+App Android PT-BR (React Native / Expo) para calcular carne e acompanhamentos de um churrasco. Código em `app/`. Planejamento BMad em `_bmad-output/`. Contrato de produto: `_bmad-output/forge/churrascometro-rateio-pix/forged-idea.md` + PRD em `_bmad-output/planning-artifacts/prds/prd-lista-do-churras-2026-08-21/`.
 
 ## Policy
 
 - Tratar `forged-idea.md` como lock: não reabrir o que está em Rejeitado sem o Igor pedir.
 - Pix **fora do V1** (override 2026-08-21). Pix na nuvem continua Rejeitado.
-- Não inventar tabela nacional de preço; o usuário cola R$/kg do açougue.
+- Preço e Total estimado **fora do app** (override 2026-11-27). A lista é só quantidade. Não inventar tabela nacional de preço.
 - Recalcular zera totais. Nunca acumular como o Bora.
 - Android PT-BR primeiro. iOS só depois do V1 Android.
 - Fome V1 é por categoria (H/M/C), não uma linha por pessoa.

@@ -122,11 +122,11 @@ export function CtaPressable({
   );
 }
 
-export function Screen({ title, sub, children }: { title: string; sub: string; children: ReactNode }) {
+export function Screen({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
   return (
     <View>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.sub}>{sub}</Text>
+      <Text style={[styles.title, !sub && styles.titleAlone]}>{title}</Text>
+      {sub ? <Text style={styles.sub}>{sub}</Text> : null}
       {children}
     </View>
   );
@@ -176,27 +176,59 @@ export function SelectCard({
 
 export function Radio({
   label,
-  hint,
   on,
   onPress,
 }: {
   label: string;
-  hint?: string;
   on: boolean;
   onPress: () => void;
 }) {
   const reduce = useReduceMotion();
   return (
-    <PressScale haptic="selection" onPress={onPress} style={[styles.radio, on && styles.radioOn]}>
+    <PressScale
+      haptic="selection"
+      onPress={onPress}
+      style={[styles.radio, on && styles.radioOn]}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: on }}
+    >
       <View style={[styles.dot, on && styles.dotOn]}>
         {on ? (
           <Animated.View entering={reduce ? undefined : enterAppear} style={styles.dotCore} />
         ) : null}
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.radioTxt}>{label}</Text>
-        {hint ? <Text style={styles.radioHint}>{hint}</Text> : null}
+      <Text style={styles.radioTxt}>{label}</Text>
+    </PressScale>
+  );
+}
+
+export function Checkbox({
+  label,
+  on,
+  onPress,
+}: {
+  label: string;
+  on: boolean;
+  onPress: () => void;
+}) {
+  const reduce = useReduceMotion();
+  return (
+    <PressScale
+      haptic="selection"
+      onPress={onPress}
+      style={[styles.radio, on && styles.radioOn]}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: on }}
+      accessibilityLabel={label}
+    >
+      <View style={[styles.box, on && styles.boxOn]}>
+        {on ? (
+          <Animated.Text entering={reduce ? undefined : enterCheck} style={styles.boxCheck}>
+            ✓
+          </Animated.Text>
+        ) : null}
       </View>
+      <Text style={styles.radioTxt}>{label}</Text>
     </PressScale>
   );
 }
@@ -264,6 +296,7 @@ export function Counter({
 
 export const styles = StyleSheet.create({
   title: { color: C.ink, fontSize: 30, fontWeight: '800', letterSpacing: -0.7, marginTop: 8 },
+  titleAlone: { marginBottom: 22 },
   sub: { color: C.muted, fontSize: 16, marginTop: 8, marginBottom: 22, lineHeight: 22 },
   groupLabel: {
     color: C.muted,
@@ -327,8 +360,18 @@ export const styles = StyleSheet.create({
   },
   dotOn: { borderColor: C.accent },
   dotCore: { width: 12, height: 12, borderRadius: 6, backgroundColor: C.accent },
-  radioTxt: { color: C.navy, fontSize: 16, fontWeight: '700' },
-  radioHint: { color: C.muted, fontSize: 13, marginTop: 2 },
+  box: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: C.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boxOn: { borderColor: C.accent, backgroundColor: C.accent },
+  boxCheck: { color: C.card, fontSize: 14, fontWeight: '800' },
+  radioTxt: { flex: 1, color: C.navy, fontSize: 16, fontWeight: '700' },
   seg: {
     flexDirection: 'row',
     backgroundColor: C.bg,

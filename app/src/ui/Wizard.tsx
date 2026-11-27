@@ -1,6 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   BackHandler,
   Keyboard,
   KeyboardAvoidingView,
@@ -14,36 +15,27 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { calcularLista, equalPercents, rebalancePercents } from '../domain/calculate';
-import { CUTS, HUNGER_LABEL, SIDE_DISPOSABLE, SIDE_FOOD, SIDES } from '../domain/catalog';
-import {
-  formatMoney,
-  formatQty,
-  groupItens,
-  listaTexto,
-  parseBrNumber,
-  SECAO_LABEL,
-  totalEstimado,
-} from '../domain/format';
+import { CUTS, HUNGER_LABEL, SIDES } from '../domain/catalog';
+import { formatQty, groupItens, listaTexto, SECAO_LABEL } from '../domain/format';
 import type { CutId, Hunger, SideId } from '../domain/types';
+import { canAdvance, INITIAL_WIZARD, reconcile, stepsFor, toChurrascoInput, type WizardAnswers } from '../domain/wizard';
 import { AdSlot } from '../monetization/AdSlot';
+import { beforeList } from '../monetization/interstitial';
 import { useMonetization } from '../monetization/MonetizationProvider';
-import {
-  beer,
-  bebemSub,
-  corteSub,
-  cta,
-  hours,
-  listaCopy,
-  mesaGroups,
-  mesaSub,
-  people as peopleCopy,
-  split,
-  STEP_NAME,
-  sub,
-  titles,
-} from './copy';
+import { beer, cta, hours, listaCopy, people as peopleCopy, restartCopy, split, STEP_NAME, titles } from './copy';
 import { ItemIcon, PeopleIcon } from './icons';
-import { Counter, CtaPressable, Grid, GroupLabel, PressScale, Radio, Screen, Segmented, SelectCard } from './kit';
+import {
+  Checkbox,
+  Counter,
+  CtaPressable,
+  Grid,
+  GroupLabel,
+  PressScale,
+  Radio,
+  Screen,
+  Segmented,
+  SelectCard,
+} from './kit';
 import { ListaRow } from './ListaRow';
 import {
   easeOut,
@@ -55,7 +47,7 @@ import {
   useReduceMotion,
 } from './motion';
 import { PrivacyPolicy } from './PrivacyPolicy';
-import type { StepId } from './steps';
+import { loadProgress, saveProgress } from './progress';
 import { C, TILE } from './theme';
 
 const HUNGER_OPTS = (['pouco', 'medio', 'muito'] as Hunger[]).map((id) => ({
@@ -72,23 +64,10 @@ const HOUR_PRESETS = [
 ];
 
 export function Wizard() {
-  const [homens, setHomens] = useState(6);
-  const [mulheres, setMulheres] = useState(0);
-  const [criancas, setCriancas] = useState(0);
-  const [fomeHomem, setFomeHomem] = useState<Hunger>('medio');
-  const [fomeMulher, setFomeMulher] = useState<Hunger>('medio');
-  const [fomeCrianca, setFomeCrianca] = useState<Hunger>('medio');
-  const [horas, setHoras] = useState(4);
-  const [corteIds, setCorteIds] = useState<CutId[]>([]);
-  const [percentuais, setPercentuais] = useState<Record<string, number>>({});
-  const [acompanhamentoIds, setAcompanhamentoIds] = useState<SideId[]>([]);
-  const [bebidaAlcoolica, setBebidaAlcoolica] = useState<boolean | null>(null);
-  const [quantosBebem, setQuantosBebem] = useState(0);
-  const [incluirRefrigerante, setIncluirRefrigerante] = useState(true);
-  const [incluirAgua, setIncluirAgua] = useState(false);
-  const [precos, setPrecos] = useState<Record<string, string>>({});
+  const [wizard, setWizard] = useState(loadProgress);
+  useEffect(() => saveProgress(wizard), [wizard]);
+  const { answers: a, step } = wizard;
   const [copied, setCopied] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
   const scrollRef = useRef<ScrollView>(null);
@@ -96,101 +75,70 @@ export function Wizard() {
   const monetization = useMonetization();
   const copySticky = monetization.adsRemoved;
 
-  const peopleCount = homens + mulheres + criancas;
-  const adults = homens + mulheres;
+  const peopleCount = a.homens + a.mulheres + a.criancas;
+  const adults = a.homens + a.mulheres;
 
-  const steps = useMemo<StepId[]>(() => {
-    const s: StepId[] = ['cortes', 'acompanhamentos', 'gente', 'fome', 'horas', 'bebida'];
-    if (bebidaAlcoolica) s.push('bebem');
-    if (corteIds.length >= 2) s.push('partilha');
-    s.push('lista');
-    return s;
-  }, [bebidaAlcoolica, corteIds.length]);
-
-  const step = steps[Math.min(stepIndex, steps.length - 1)];
+  const steps = stepsFor(a);
+  const stepIndex = steps.indexOf(step);
   const progress = (stepIndex + 1) / steps.length;
   const stepEntering = reduceMotion ? undefined : direction === 'forward' ? enterStepForward : enterStepBack;
 
-  const lista = useMemo(
-    () =>
-      calcularLista({
-        homens,
-        mulheres,
-        criancas,
-        fomeHomem,
-        fomeMulher,
-        fomeCrianca,
-        horas,
-        corteIds,
-        percentuais,
-        acompanhamentoIds,
-        bebidaAlcoolica: Boolean(bebidaAlcoolica),
-        quantosBebem: Math.min(quantosBebem, peopleCount),
-        incluirRefrigerante,
-        incluirAgua,
-      }),
-    [
-      homens,
-      mulheres,
-      criancas,
-      fomeHomem,
-      fomeMulher,
-      fomeCrianca,
-      horas,
-      corteIds,
-      percentuais,
-      acompanhamentoIds,
-      bebidaAlcoolica,
-      quantosBebem,
-      incluirRefrigerante,
-      incluirAgua,
-      peopleCount,
-    ],
-  );
-
-  const total = totalEstimado(lista, precos);
-  const pricedCount = lista.ok ? lista.itens.filter((i) => parseBrNumber(precos[i.id] ?? '') != null).length : 0;
+  const lista = useMemo(() => calcularLista(toChurrascoInput(a)), [a]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, [stepIndex]);
+  }, [step]);
+
+  const edit = (patch: Partial<WizardAnswers> | ((a: WizardAnswers) => Partial<WizardAnswers>)) =>
+    setWizard((w) => ({
+      ...w,
+      answers: reconcile({ ...w.answers, ...(typeof patch === 'function' ? patch(w.answers) : patch) }),
+    }));
 
   function toggleCut(id: CutId) {
-    setCorteIds((prev) => {
-      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
-      setPercentuais(equalPercents(next));
-      return next;
+    edit((a) => {
+      const corteIds = a.corteIds.includes(id) ? a.corteIds.filter((x) => x !== id) : [...a.corteIds, id];
+      return { corteIds, percentuais: equalPercents(corteIds) };
     });
   }
 
   function toggleSide(id: SideId) {
-    setAcompanhamentoIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  }
-
-  function setPeople(kind: 'h' | 'm' | 'c', n: number) {
-    const nextH = kind === 'h' ? n : homens;
-    const nextM = kind === 'm' ? n : mulheres;
-    const nextC = kind === 'c' ? n : criancas;
-    if (kind === 'h') setHomens(n);
-    if (kind === 'm') setMulheres(n);
-    if (kind === 'c') setCriancas(n);
-    setQuantosBebem((q) => Math.min(q, nextH + nextM + nextC));
+    edit((a) => ({
+      acompanhamentoIds: a.acompanhamentoIds.includes(id)
+        ? a.acompanhamentoIds.filter((x) => x !== id)
+        : [...a.acompanhamentoIds, id],
+    }));
   }
 
   function canContinue(): boolean {
-    if (step === 'cortes') return corteIds.length > 0;
-    if (step === 'gente') return peopleCount > 0;
-    if (step === 'horas') return horas > 0;
-    if (step === 'bebida') return bebidaAlcoolica !== null;
-    if (step === 'bebem') return quantosBebem >= 0 && quantosBebem <= peopleCount;
-    if (step === 'lista') return lista.ok;
-    return true;
+    return step === 'lista' ? lista.ok : canAdvance(step, a);
   }
 
   function next() {
     if (!canContinue()) return;
-    setDirection('forward');
-    setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+    const advance = () => {
+      setDirection('forward');
+      setWizard((w) => {
+        const s = stepsFor(w.answers);
+        return { ...w, step: s[Math.min(s.indexOf(w.step) + 1, s.length - 1)] };
+      });
+    };
+    if (steps[stepIndex + 1] === 'lista') void beforeList(monetization.adsRemoved).then(advance);
+    else advance();
+  }
+
+  function restart() {
+    Alert.alert(restartCopy.title, restartCopy.body, [
+      { text: restartCopy.cancel, style: 'cancel' },
+      {
+        text: restartCopy.confirm,
+        style: 'destructive',
+        onPress: () => {
+          setDirection('back');
+          setWizard(INITIAL_WIZARD);
+        },
+      },
+    ]);
   }
 
   const back = useCallback(() => {
@@ -199,7 +147,10 @@ export function Wizard() {
       return;
     }
     setDirection('back');
-    setStepIndex((i) => Math.max(i - 1, 0));
+    setWizard((w) => {
+      const s = stepsFor(w.answers);
+      return { ...w, step: s[Math.max(s.indexOf(w.step) - 1, 0)] };
+    });
   }, [showPrivacy]);
 
   useEffect(() => {
@@ -218,13 +169,13 @@ export function Wizard() {
   }, [back, showPrivacy, stepIndex]);
 
   async function copyLista() {
-    await Clipboard.setStringAsync(listaTexto(lista, precos));
+    await Clipboard.setStringAsync(listaTexto(lista));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
   function ctaLabel(): string {
-    if (step === 'acompanhamentos' && acompanhamentoIds.length === 0) return cta.skipMesa;
+    if (step === 'acompanhamentos' && a.acompanhamentoIds.length === 0) return cta.skipMesa;
     if (steps[stepIndex + 1] === 'lista') return cta.seeLista;
     return cta.continue;
   }
@@ -232,6 +183,12 @@ export function Wizard() {
   if (showPrivacy) {
     return <PrivacyPolicy onBack={() => setShowPrivacy(false)} />;
   }
+
+  const restartLink = (
+    <PressScale haptic="selection" onPress={restart} style={styles.ghostLink} accessibilityRole="button">
+      <Text style={styles.link}>{cta.startOver}</Text>
+    </PressScale>
+  );
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
@@ -265,7 +222,7 @@ export function Wizard() {
         >
           <Animated.View key={`${stepIndex}-${step}`} entering={stepEntering}>
             {step === 'cortes' && (
-              <Screen title={titles.cortes} sub={corteSub(corteIds.length)}>
+              <Screen title={titles.cortes}>
                 <Grid>
                   {CUTS.map((c, i) => (
                     <SelectCard
@@ -273,7 +230,7 @@ export function Wizard() {
                       icon={<ItemIcon id={c.id} />}
                       label={c.nome}
                       tint={TILE[i % TILE.length]}
-                      on={corteIds.includes(c.id)}
+                      on={a.corteIds.includes(c.id)}
                       onPress={() => toggleCut(c.id)}
                     />
                   ))}
@@ -282,30 +239,15 @@ export function Wizard() {
             )}
 
             {step === 'acompanhamentos' && (
-              <Screen title={titles.acompanhamentos} sub={mesaSub(acompanhamentoIds.length)}>
-                <GroupLabel>{mesaGroups.food}</GroupLabel>
+              <Screen title={titles.acompanhamentos}>
                 <Grid>
-                  {SIDES.filter((s) => SIDE_FOOD.includes(s.id)).map((s, i) => (
+                  {SIDES.map((s, i) => (
                     <SelectCard
                       key={s.id}
                       icon={<ItemIcon id={s.id} />}
                       label={s.nome}
                       tint={TILE[i % TILE.length]}
-                      on={acompanhamentoIds.includes(s.id)}
-                      onPress={() => toggleSide(s.id)}
-                    />
-                  ))}
-                </Grid>
-                <View style={{ height: 12 }} />
-                <GroupLabel>{mesaGroups.disposable}</GroupLabel>
-                <Grid>
-                  {SIDES.filter((s) => SIDE_DISPOSABLE.includes(s.id)).map((s, i) => (
-                    <SelectCard
-                      key={s.id}
-                      icon={<ItemIcon id={s.id} />}
-                      label={s.nome}
-                      tint={TILE[(i + 2) % TILE.length]}
-                      on={acompanhamentoIds.includes(s.id)}
+                      on={a.acompanhamentoIds.includes(s.id)}
                       onPress={() => toggleSide(s.id)}
                     />
                   ))}
@@ -314,39 +256,45 @@ export function Wizard() {
             )}
 
             {step === 'gente' && (
-              <Screen title={titles.gente} sub={sub.gente}>
-                <PeopleRow kind="h" label={peopleCopy.homens} value={homens} onChange={(n) => setPeople('h', n)} />
-                <PeopleRow kind="m" label={peopleCopy.mulheres} value={mulheres} onChange={(n) => setPeople('m', n)} />
-                <PeopleRow kind="c" label={peopleCopy.criancas} value={criancas} onChange={(n) => setPeople('c', n)} />
+              <Screen title={titles.gente}>
+                <PeopleRow kind="h" label={peopleCopy.homens} value={a.homens} onChange={(n) => edit({ homens: n })} />
+                <PeopleRow kind="m" label={peopleCopy.mulheres} value={a.mulheres} onChange={(n) => edit({ mulheres: n })} />
+                <PeopleRow kind="c" label={peopleCopy.criancas} value={a.criancas} onChange={(n) => edit({ criancas: n })} />
                 <Text style={styles.liveTotal}>{peopleCopy.live(peopleCount)}</Text>
               </Screen>
             )}
 
             {step === 'fome' && (
-              <Screen title={titles.fome} sub={sub.fome}>
-                {homens > 0 && <HungerRow label={peopleCopy.homens} value={fomeHomem} onChange={setFomeHomem} />}
-                {mulheres > 0 && <HungerRow label={peopleCopy.mulheres} value={fomeMulher} onChange={setFomeMulher} />}
-                {criancas > 0 && <HungerRow label={peopleCopy.criancas} value={fomeCrianca} onChange={setFomeCrianca} />}
+              <Screen title={titles.fome}>
+                {a.homens > 0 && (
+                  <HungerRow label={peopleCopy.homens} value={a.fomeHomem} onChange={(h) => edit({ fomeHomem: h })} />
+                )}
+                {a.mulheres > 0 && (
+                  <HungerRow label={peopleCopy.mulheres} value={a.fomeMulher} onChange={(h) => edit({ fomeMulher: h })} />
+                )}
+                {a.criancas > 0 && (
+                  <HungerRow label={peopleCopy.criancas} value={a.fomeCrianca} onChange={(h) => edit({ fomeCrianca: h })} />
+                )}
               </Screen>
             )}
 
             {step === 'horas' && (
-              <Screen title={titles.horas} sub={sub.horas}>
+              <Screen title={titles.horas}>
                 <View style={styles.presetRow}>
                   {HOUR_PRESETS.map((p) => (
                     <PressScale
                       key={p.h}
                       haptic="selection"
-                      onPress={() => setHoras(p.h)}
-                      style={[styles.preset, horas === p.h && styles.presetOn]}
+                      onPress={() => edit({ horas: p.h })}
+                      style={[styles.preset, a.horas === p.h && styles.presetOn]}
                     >
-                      <Text style={[styles.presetH, horas === p.h && styles.presetOnTxt]}>{p.h} h</Text>
-                      <Text style={[styles.presetTag, horas === p.h && styles.presetOnTxt]}>{p.tag}</Text>
+                      <Text style={[styles.presetH, a.horas === p.h && styles.presetOnTxt]}>{p.h} h</Text>
+                      <Text style={[styles.presetTag, a.horas === p.h && styles.presetOnTxt]}>{p.tag}</Text>
                     </PressScale>
                   ))}
                 </View>
                 <Text style={styles.micro}>{hours.adjust}</Text>
-                <Counter value={horas} onChange={setHoras} min={1} max={12} />
+                <Counter value={a.horas} onChange={(n) => edit({ horas: n })} min={1} max={12} />
                 {lista.ok ? (
                   <Animated.View entering={reduceMotion ? undefined : enterAppear} style={styles.preview}>
                     <Text style={styles.previewKicker}>{hours.about}</Text>
@@ -359,62 +307,44 @@ export function Wizard() {
             )}
 
             {step === 'bebida' && (
-              <Screen title={titles.bebida} sub={sub.bebida}>
+              <Screen title={titles.bebida}>
                 <Radio
                   label={beer.yes}
-                  hint={beer.yesHint(peopleCount)}
-                  on={bebidaAlcoolica === true}
-                  onPress={() => {
-                    setBebidaAlcoolica(true);
-                    if (quantosBebem === 0) {
-                      setQuantosBebem(Math.min(peopleCount, Math.max(1, adults)));
-                    }
-                  }}
+                  on={a.bebidaAlcoolica === true}
+                  onPress={() =>
+                    edit({
+                      bebidaAlcoolica: true,
+                      quantosBebem: a.quantosBebem === 0 ? Math.min(peopleCount, Math.max(1, adults)) : a.quantosBebem,
+                    })
+                  }
                 />
                 <Radio
                   label={beer.no}
-                  hint={beer.noHint}
-                  on={bebidaAlcoolica === false}
-                  onPress={() => {
-                    setBebidaAlcoolica(false);
-                    setQuantosBebem(0);
-                  }}
+                  on={a.bebidaAlcoolica === false}
+                  onPress={() => edit({ bebidaAlcoolica: false })}
                 />
                 <View style={{ height: 12 }} />
                 <GroupLabel>{beer.extra}</GroupLabel>
-                <Radio
+                <Checkbox
                   label={beer.soda}
-                  hint={beer.sodaHint}
-                  on={incluirRefrigerante}
-                  onPress={() => setIncluirRefrigerante((v) => !v)}
+                  on={a.incluirRefrigerante}
+                  onPress={() => edit((a) => ({ incluirRefrigerante: !a.incluirRefrigerante }))}
                 />
-                <Radio
-                  label={beer.water}
-                  hint={beer.waterHint}
-                  on={incluirAgua}
-                  onPress={() => setIncluirAgua((v) => !v)}
-                />
+                <Checkbox label={beer.water} on={a.incluirAgua} onPress={() => edit((a) => ({ incluirAgua: !a.incluirAgua }))} />
               </Screen>
             )}
 
             {step === 'bebem' && (
-              <Screen title={titles.bebem} sub={bebemSub(peopleCount)}>
-                <Counter value={quantosBebem} onChange={setQuantosBebem} min={0} max={peopleCount} />
-                <PressScale
-                  haptic="selection"
-                  onPress={() => setQuantosBebem(Math.min(peopleCount, adults))}
-                  style={styles.ghostLink}
-                >
-                  <Text style={styles.link}>{peopleCopy.adultsOnly(adults)}</Text>
-                </PressScale>
+              <Screen title={titles.bebem}>
+                <Counter value={a.quantosBebem} onChange={(n) => edit({ quantosBebem: n })} min={0} max={peopleCount} />
               </Screen>
             )}
 
             {step === 'partilha' && (
-              <Screen title={titles.partilha} sub={sub.partilha}>
-                {corteIds.map((id) => {
+              <Screen title={titles.partilha} sub={lista.ok ? split.total(formatQty(lista.carneKg, 'kg')) : undefined}>
+                {a.corteIds.map((id) => {
                   const nome = CUTS.find((c) => c.id === id)?.nome ?? id;
-                  const pct = percentuais[id] ?? 0;
+                  const pct = a.percentuais[id] ?? 0;
                   const kg = lista.ok ? lista.itens.find((i) => i.id === id)?.quantidade : undefined;
                   return (
                     <View key={id} style={styles.splitCard}>
@@ -429,7 +359,7 @@ export function Wizard() {
                         <PressScale
                           haptic="light"
                           style={styles.roundBtn}
-                          onPress={() => setPercentuais(rebalancePercents(corteIds, percentuais, id, pct - 5))}
+                          onPress={() => edit({ percentuais: rebalancePercents(a.corteIds, a.percentuais, id, pct - 5) })}
                         >
                           <Text style={styles.roundBtnTxt}>−</Text>
                         </PressScale>
@@ -437,7 +367,7 @@ export function Wizard() {
                         <PressScale
                           haptic="light"
                           style={styles.roundBtn}
-                          onPress={() => setPercentuais(rebalancePercents(corteIds, percentuais, id, pct + 5))}
+                          onPress={() => edit({ percentuais: rebalancePercents(a.corteIds, a.percentuais, id, pct + 5) })}
                         >
                           <Text style={styles.roundBtnTxt}>+</Text>
                         </PressScale>
@@ -447,7 +377,7 @@ export function Wizard() {
                 })}
                 <PressScale
                   haptic="selection"
-                  onPress={() => setPercentuais(equalPercents(corteIds))}
+                  onPress={() => edit({ percentuais: equalPercents(a.corteIds) })}
                   style={styles.ghostLink}
                 >
                   <Text style={styles.link}>{split.reset}</Text>
@@ -456,7 +386,7 @@ export function Wizard() {
             )}
 
             {step === 'lista' && (
-              <Screen title={titles.lista} sub={sub.lista}>
+              <Screen title={titles.lista}>
                 {!lista.ok ? (
                   <Text style={styles.warn}>{lista.motivo}</Text>
                 ) : (
@@ -465,32 +395,17 @@ export function Wizard() {
                       <Text style={styles.heroKicker}>{listaCopy.heroKicker}</Text>
                       <Text style={styles.hero}>{formatQty(lista.carneKg, 'kg')}</Text>
                       <Text style={styles.heroSub}>{listaCopy.ofMeat}</Text>
-                      <Text style={styles.heroMeta}>{listaCopy.meta(peopleCount, horas)}</Text>
+                      <Text style={styles.heroMeta}>{listaCopy.meta(peopleCount, a.horas)}</Text>
                     </Animated.View>
 
                     {groupItens(lista.itens).map((g) => (
                       <View key={g.secao} style={styles.section}>
                         <Text style={styles.sectionTitle}>{SECAO_LABEL[g.secao]}</Text>
                         {g.itens.map((item) => (
-                          <ListaRow
-                            key={item.id}
-                            item={item}
-                            value={precos[item.id] ?? ''}
-                            onChange={(t) => setPrecos((p) => ({ ...p, [item.id]: t }))}
-                          />
+                          <ListaRow key={item.id} item={item} />
                         ))}
                       </View>
                     ))}
-
-                    {total > 0 ? (
-                      <Animated.View entering={reduceMotion ? undefined : enterAppear} style={styles.totalCard}>
-                        <Text style={styles.totalKicker}>{listaCopy.pricedOf(pricedCount, lista.itens.length)}</Text>
-                        <Text style={styles.total}>{listaCopy.total(formatMoney(total))}</Text>
-                        <Text style={styles.totalHint}>{listaCopy.totalHint}</Text>
-                      </Animated.View>
-                    ) : (
-                      <Text style={styles.microLeft}>{listaCopy.noPrices}</Text>
-                    )}
                   </>
                 )}
                 {!copySticky ? (
@@ -513,6 +428,7 @@ export function Wizard() {
                     >
                       <Text style={styles.ctaTxt}>{copied ? cta.copied : cta.copy}</Text>
                     </CtaPressable>
+                    {restartLink}
                   </>
                 ) : null}
               </Screen>
@@ -523,16 +439,19 @@ export function Wizard() {
         {step !== 'lista' || copySticky ? (
           <View style={styles.footer}>
             {step === 'lista' ? (
-              <CtaPressable
-                enabled={canContinue()}
-                success={copied}
-                haptic="success"
-                onPress={copyLista}
-                style={styles.cta}
-                accessibilityRole="button"
-              >
-                <Text style={styles.ctaTxt}>{copied ? cta.copied : cta.copy}</Text>
-              </CtaPressable>
+              <>
+                <CtaPressable
+                  enabled={canContinue()}
+                  success={copied}
+                  haptic="success"
+                  onPress={copyLista}
+                  style={styles.cta}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.ctaTxt}>{copied ? cta.copied : cta.copy}</Text>
+                </CtaPressable>
+                {restartLink}
+              </>
             ) : (
               <CtaPressable enabled={canContinue()} haptic="selection" onPress={next} style={styles.cta}>
                 <Text style={styles.ctaTxt}>{ctaLabel()}</Text>
@@ -668,7 +587,6 @@ const styles = StyleSheet.create({
   presetTag: { color: C.muted, fontSize: 11, marginTop: 2, fontWeight: '600' },
   presetOnTxt: { color: C.card },
   micro: { color: C.muted, marginBottom: 12, textAlign: 'center' },
-  microLeft: { color: C.muted, marginTop: 8, lineHeight: 20 },
   preview: {
     marginTop: 24,
     backgroundColor: C.accentSoft,
@@ -729,15 +647,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 8,
   },
-  totalCard: {
-    backgroundColor: C.accentSoft,
-    borderRadius: 20,
-    padding: 16,
-    marginTop: 8,
-  },
-  totalKicker: { color: C.accent, fontWeight: '700', fontSize: 12 },
-  total: { color: C.ink, fontSize: 22, fontWeight: '800', marginTop: 4 },
-  totalHint: { color: C.muted, marginTop: 6, fontSize: 13, lineHeight: 18 },
   warn: { color: C.accent, fontSize: 16 },
   footer: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
   listaCopy: { marginTop: 28 },

@@ -4,11 +4,13 @@ import packageJson from './package.json';
 
 const projectId = '3e4a9a0c-d076-4c69-8ae9-328888a850ef';
 
-/** Google sample App IDs — public docs, not a publisher account. */
-const ADMOB_ANDROID_APP_ID = 'ca-app-pub-3940256099942544~3347511713';
+const ADMOB_ANDROID_APP_ID = 'ca-app-pub-2651299405438352~9374647235';
+/** Google sample App ID. There is no iOS app in AdMob yet. */
 const ADMOB_IOS_APP_ID = 'ca-app-pub-3940256099942544~1458002511';
-const ADMOB_BANNER_UNIT_ID = '';
-const ADS_USE_TEST_UNITS = true;
+/** Android units. Development builds ignore them and use Google's test units. */
+const ADMOB_BANNER_UNIT_ID = 'ca-app-pub-2651299405438352/2206428641';
+const ADMOB_INTERSTITIAL_UNIT_ID = 'ca-app-pub-2651299405438352/6998820784';
+const ADS_USE_TEST_UNITS = false;
 const IAP_PRODUCT_ID = 'lista_sem_anuncio';
 
 const config: ExpoConfig = {
@@ -88,6 +90,7 @@ const config: ExpoConfig = {
     },
     iapProductId: IAP_PRODUCT_ID,
     admobBannerUnitId: ADMOB_BANNER_UNIT_ID,
+    admobInterstitialUnitId: ADMOB_INTERSTITIAL_UNIT_ID,
     adsUseTestUnits: ADS_USE_TEST_UNITS,
   },
   // Concrete string so `eas update` can resolve it without a checked-in android/ tree.
