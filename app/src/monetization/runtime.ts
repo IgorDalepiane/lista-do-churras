@@ -13,4 +13,4 @@ export const ADMOB_BANNER_UNIT_ID = extraString('admobBannerUnitId') ?? '';
 
 export const ADMOB_INTERSTITIAL_UNIT_ID = extraString('admobInterstitialUnitId') ?? '';
 
-export const ADS_USE_TEST_UNITS = extra?.adsUseTestUnits !== false;
+export const ADS_USE_TEST_UNITS = __DEV__ || extra?.adsUseTestUnits !== false;
