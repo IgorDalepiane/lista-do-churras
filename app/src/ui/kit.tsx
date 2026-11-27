@@ -122,11 +122,11 @@ export function CtaPressable({
   );
 }
 
-export function Screen({ title, sub, children }: { title: string; sub: string; children: ReactNode }) {
+export function Screen({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
   return (
     <View>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.sub}>{sub}</Text>
+      <Text style={[styles.title, !sub && styles.titleAlone]}>{title}</Text>
+      {sub ? <Text style={styles.sub}>{sub}</Text> : null}
       {children}
     </View>
   );
@@ -264,6 +264,7 @@ export function Counter({
 
 export const styles = StyleSheet.create({
   title: { color: C.ink, fontSize: 30, fontWeight: '800', letterSpacing: -0.7, marginTop: 8 },
+  titleAlone: { marginBottom: 22 },
   sub: { color: C.muted, fontSize: 16, marginTop: 8, marginBottom: 22, lineHeight: 22 },
   groupLabel: {
     color: C.muted,

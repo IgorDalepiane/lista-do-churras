@@ -8,45 +8,21 @@ export const STEP_NAME: Record<StepId, string> = {
   horas: 'Fogo',
   bebida: 'Cerveja',
   bebem: 'Quem bebe',
-  partilha: 'Partilha',
+  partilha: 'Divisão',
   lista: 'Lista',
 };
 
 export const titles: Record<StepId, string> = {
-  cortes: 'O que vai para a grelha?',
-  acompanhamentos: 'E na mesa?',
-  gente: 'Quem vem?',
-  fome: 'Como está a fome?',
-  horas: 'Quanto tempo de fogo?',
-  bebida: 'Vai ter cerveja?',
-  bebem: 'Quantos bebem?',
-  partilha: 'Como parte a carne?',
-  lista: 'Sua lista',
+  cortes: 'Escolha os cortes',
+  acompanhamentos: 'Escolha os acompanhamentos',
+  gente: 'Informe quantas pessoas vêm',
+  fome: 'Defina a fome dos convidados',
+  horas: 'Defina a duração do churrasco',
+  bebida: 'Informe se vai ter cerveja',
+  bebem: 'Informe quantos bebem cerveja',
+  partilha: 'Divida a carne entre os cortes',
+  lista: 'Confira sua lista de compras',
 };
-
-export function corteSub(count: number): string {
-  if (count === 0) return 'Escolhe os cortes. A quantidade aparece no fim.';
-  return `${count} corte${count > 1 ? 's' : ''}. A quantidade aparece no fim.`;
-}
-
-export function mesaSub(count: number): string {
-  if (count === 0) return 'O que mais entra na lista: comida e descartável. Pode pular.';
-  return `${count} ${count > 1 ? 'itens' : 'item'} fora da grelha.`;
-}
-
-export const sub = {
-  gente: 'Quantas pessoas vêm.',
-  fome: 'Um nível para cada grupo que vem.',
-  horas: 'Quanto mais tempo, mais carne.',
-  bebida: 'Se sim, na próxima pergunta a gente pergunta quantos bebem.',
-  partilha: 'Como divide o kg entre os cortes.',
-  lista: 'O que comprar.',
-};
-
-export function bebemSub(people: number): string {
-  const n = people === 1 ? '1 pessoa' : `${people} pessoas`;
-  return `Até ${n}.`;
-}
 
 export const cta = {
   continue: 'Continuar',
@@ -66,7 +42,6 @@ export const people = {
   mulheres: 'Mulheres',
   criancas: 'Crianças',
   live: (n: number) => `${n} ${n === 1 ? 'pessoa' : 'pessoas'}`,
-  adultsOnly: (n: number) => `Usar só os adultos (${n})`,
 };
 
 export const hours = {
@@ -77,18 +52,15 @@ export const hours = {
 
 export const beer = {
   yes: 'Sim, tem quem bebe',
-  yesHint: (n: number) => `${n} ${n === 1 ? 'pessoa' : 'pessoas'} no total`,
   no: 'Não, só o churrasco',
-  noHint: 'A lista fica sem litro de cerveja',
   extra: 'Também na lista',
   soda: 'Refrigerante',
-  sodaHint: 'Quem bebe cerveja não entra nessa conta.',
   water: 'Água',
-  waterHint: 'Muita gente não toma. Liga se for comprar garrafa.',
 };
 
 export const split = {
-  reset: 'Voltar ao recomendado (partilha igual)',
+  reset: 'Dividir por igual',
+  total: (kg: string) => `${kg} no total`,
 };
 
 export const listaCopy = {

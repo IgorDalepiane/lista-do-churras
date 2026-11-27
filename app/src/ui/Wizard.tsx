@@ -19,21 +19,7 @@ import { formatQty, groupItens, listaTexto, SECAO_LABEL } from '../domain/format
 import type { CutId, Hunger, SideId } from '../domain/types';
 import { AdSlot } from '../monetization/AdSlot';
 import { useMonetization } from '../monetization/MonetizationProvider';
-import {
-  beer,
-  bebemSub,
-  corteSub,
-  cta,
-  hours,
-  listaCopy,
-  mesaGroups,
-  mesaSub,
-  people as peopleCopy,
-  split,
-  STEP_NAME,
-  sub,
-  titles,
-} from './copy';
+import { beer, cta, hours, listaCopy, mesaGroups, people as peopleCopy, split, STEP_NAME, titles } from './copy';
 import { ItemIcon, PeopleIcon } from './icons';
 import { Counter, CtaPressable, Grid, GroupLabel, PressScale, Radio, Screen, Segmented, SelectCard } from './kit';
 import { ListaRow } from './ListaRow';
@@ -253,7 +239,7 @@ export function Wizard() {
         >
           <Animated.View key={`${stepIndex}-${step}`} entering={stepEntering}>
             {step === 'cortes' && (
-              <Screen title={titles.cortes} sub={corteSub(corteIds.length)}>
+              <Screen title={titles.cortes}>
                 <Grid>
                   {CUTS.map((c, i) => (
                     <SelectCard
@@ -270,7 +256,7 @@ export function Wizard() {
             )}
 
             {step === 'acompanhamentos' && (
-              <Screen title={titles.acompanhamentos} sub={mesaSub(acompanhamentoIds.length)}>
+              <Screen title={titles.acompanhamentos}>
                 <GroupLabel>{mesaGroups.food}</GroupLabel>
                 <Grid>
                   {SIDES.filter((s) => SIDE_FOOD.includes(s.id)).map((s, i) => (
@@ -302,7 +288,7 @@ export function Wizard() {
             )}
 
             {step === 'gente' && (
-              <Screen title={titles.gente} sub={sub.gente}>
+              <Screen title={titles.gente}>
                 <PeopleRow kind="h" label={peopleCopy.homens} value={homens} onChange={(n) => setPeople('h', n)} />
                 <PeopleRow kind="m" label={peopleCopy.mulheres} value={mulheres} onChange={(n) => setPeople('m', n)} />
                 <PeopleRow kind="c" label={peopleCopy.criancas} value={criancas} onChange={(n) => setPeople('c', n)} />
@@ -311,7 +297,7 @@ export function Wizard() {
             )}
 
             {step === 'fome' && (
-              <Screen title={titles.fome} sub={sub.fome}>
+              <Screen title={titles.fome}>
                 {homens > 0 && <HungerRow label={peopleCopy.homens} value={fomeHomem} onChange={setFomeHomem} />}
                 {mulheres > 0 && <HungerRow label={peopleCopy.mulheres} value={fomeMulher} onChange={setFomeMulher} />}
                 {criancas > 0 && <HungerRow label={peopleCopy.criancas} value={fomeCrianca} onChange={setFomeCrianca} />}
@@ -319,7 +305,7 @@ export function Wizard() {
             )}
 
             {step === 'horas' && (
-              <Screen title={titles.horas} sub={sub.horas}>
+              <Screen title={titles.horas}>
                 <View style={styles.presetRow}>
                   {HOUR_PRESETS.map((p) => (
                     <PressScale
@@ -347,10 +333,9 @@ export function Wizard() {
             )}
 
             {step === 'bebida' && (
-              <Screen title={titles.bebida} sub={sub.bebida}>
+              <Screen title={titles.bebida}>
                 <Radio
                   label={beer.yes}
-                  hint={beer.yesHint(peopleCount)}
                   on={bebidaAlcoolica === true}
                   onPress={() => {
                     setBebidaAlcoolica(true);
@@ -361,7 +346,6 @@ export function Wizard() {
                 />
                 <Radio
                   label={beer.no}
-                  hint={beer.noHint}
                   on={bebidaAlcoolica === false}
                   onPress={() => {
                     setBebidaAlcoolica(false);
@@ -370,36 +354,19 @@ export function Wizard() {
                 />
                 <View style={{ height: 12 }} />
                 <GroupLabel>{beer.extra}</GroupLabel>
-                <Radio
-                  label={beer.soda}
-                  hint={beer.sodaHint}
-                  on={incluirRefrigerante}
-                  onPress={() => setIncluirRefrigerante((v) => !v)}
-                />
-                <Radio
-                  label={beer.water}
-                  hint={beer.waterHint}
-                  on={incluirAgua}
-                  onPress={() => setIncluirAgua((v) => !v)}
-                />
+                <Radio label={beer.soda} on={incluirRefrigerante} onPress={() => setIncluirRefrigerante((v) => !v)} />
+                <Radio label={beer.water} on={incluirAgua} onPress={() => setIncluirAgua((v) => !v)} />
               </Screen>
             )}
 
             {step === 'bebem' && (
-              <Screen title={titles.bebem} sub={bebemSub(peopleCount)}>
+              <Screen title={titles.bebem}>
                 <Counter value={quantosBebem} onChange={setQuantosBebem} min={0} max={peopleCount} />
-                <PressScale
-                  haptic="selection"
-                  onPress={() => setQuantosBebem(Math.min(peopleCount, adults))}
-                  style={styles.ghostLink}
-                >
-                  <Text style={styles.link}>{peopleCopy.adultsOnly(adults)}</Text>
-                </PressScale>
               </Screen>
             )}
 
             {step === 'partilha' && (
-              <Screen title={titles.partilha} sub={sub.partilha}>
+              <Screen title={titles.partilha} sub={lista.ok ? split.total(formatQty(lista.carneKg, 'kg')) : undefined}>
                 {corteIds.map((id) => {
                   const nome = CUTS.find((c) => c.id === id)?.nome ?? id;
                   const pct = percentuais[id] ?? 0;
@@ -444,7 +411,7 @@ export function Wizard() {
             )}
 
             {step === 'lista' && (
-              <Screen title={titles.lista} sub={sub.lista}>
+              <Screen title={titles.lista}>
                 {!lista.ok ? (
                   <Text style={styles.warn}>{lista.motivo}</Text>
                 ) : (
